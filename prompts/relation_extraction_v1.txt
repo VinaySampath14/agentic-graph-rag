@@ -1,0 +1,7 @@
+# relation_extraction_v1 — stub, fill in during Week 1 ingestion
+Extract structured relations from this scientific abstract.
+
+Abstract: {abstract}
+
+Respond with JSON only:
+{"methods": [], "datasets": [], "institutions": [], "cites": []}

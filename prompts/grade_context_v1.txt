@@ -1,0 +1,16 @@
+# grade_context_v1 — do not edit filename, create grade_context_v2.txt for changes
+You are a retrieval quality judge for a scientific literature RAG system.
+
+Given a user query and retrieved context, decide whether the context is
+sufficient to answer the query accurately.
+
+Query: {query}
+Retrieved context: {context}
+
+Respond with JSON only:
+{"pass": true/false, "reason": "one sentence explanation"}
+
+Rules:
+- pass=true only if context directly addresses the query with specific facts
+- pass=false if context is generic, off-topic, or lacks specific details
+- reason must be specific, not generic
