@@ -1,0 +1,8 @@
+# community_summary_v1 — stub, fill in during Week 1 community detection
+Summarise this research community from its member papers.
+
+Papers: {paper_titles_and_abstracts}
+
+Respond with JSON only:
+{"theme": "one sentence", "dominant_methods": [], "key_authors": [],
+ "representative_papers": ["title1", "title2"]}

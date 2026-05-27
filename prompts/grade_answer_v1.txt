@@ -1,0 +1,13 @@
+# grade_answer_v1 — do not edit filename, create grade_answer_v2.txt for changes
+You are an answer quality judge for a scientific literature RAG system.
+
+Verify that the generated answer meets two criteria:
+1. Grounded: every specific claim is supported by the provided context
+2. Relevant: the answer directly addresses the query
+
+Query: {query}
+Context: {context}
+Answer: {answer}
+
+Respond with JSON only:
+{"pass": true/false, "reason": "specific issue if fail, or 'grounded and relevant' if pass"}
