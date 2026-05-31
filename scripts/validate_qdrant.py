@@ -20,7 +20,11 @@ print(f"{status} Points in collection: {count} (expected 2000)")
 
 # Check 2: vector config
 vec_config = info.config.params.vectors
-print(f"✓ Vector configs: {list(vec_config.keys())}")
+sparse_config = info.config.params.sparse_vectors
+dense_keys = list(vec_config.keys()) if vec_config else []
+sparse_keys = list(sparse_config.keys()) if sparse_config else []
+print(f"{'✓' if 'dense' in dense_keys else '✗'} Dense vectors: {dense_keys}")
+print(f"{'✓' if 'sparse' in sparse_keys else '✗'} Sparse vectors: {sparse_keys}")
 
 # Check 3: sample a point and check payload
 sample = client.scroll(
