@@ -23,11 +23,11 @@ def retrieve(query: str) -> RetrievalResult:
     client = _get_client()
 
     try:
-        response = client.search(query, max_results=TOP_K)
+        response = client.search(query, max_results=TOP_K, timeout=10)
         results = response.get("results", [])
     except Exception as e:
         return RetrievalResult(
-            context_text=f"Web search failed: {e}",
+            context_text=f"Web search unavailable: {e}",
             source_type="web",
         )
 
