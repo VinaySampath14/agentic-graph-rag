@@ -8,12 +8,10 @@ from groq import Groq
 from dotenv import load_dotenv
 
 from src.agent.state import AgentState
-from src.retrievers import (
-    naive_retriever,
-    graph_retriever,
-    community_retriever,
-    web_retriever,
-)
+from src.retrievers import naive_retriever
+from src.retrievers import graph_retriever
+from src.retrievers import community_retriever
+from src.retrievers import web_retriever
 from src.retrievers.router import classify
 from src.retrievers.context_budget import apply_budget
 from src.retrievers.models import GradeResult, GeneratorOutput
