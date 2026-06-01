@@ -1,0 +1,20 @@
+{"query": "Who are the authors of papers using LoRA?", "expected_mode": "graph"}
+{"query": "Which papers cite the Transformer architecture?", "expected_mode": "graph"}
+{"query": "What institutions collaborate on LLM research?", "expected_mode": "graph"}
+{"query": "Who published papers on RLHF at NeurIPS?", "expected_mode": "graph"}
+{"query": "Which authors worked on both LoRA and RLHF?", "expected_mode": "graph"}
+{"query": "What papers did Yang Liu write?", "expected_mode": "graph"}
+{"query": "Which papers use the Attention method?", "expected_mode": "graph"}
+{"query": "What are the main trends in LLM reasoning?", "expected_mode": "community"}
+{"query": "Give me an overview of parameter-efficient fine-tuning research", "expected_mode": "community"}
+{"query": "What are the dominant approaches in multimodal learning?", "expected_mode": "community"}
+{"query": "Summarise the state of LLM alignment research", "expected_mode": "community"}
+{"query": "What are researchers broadly working on in NLP?", "expected_mode": "community"}
+{"query": "What is the LoRA method?", "expected_mode": "vector"}
+{"query": "How does RLHF work?", "expected_mode": "vector"}
+{"query": "What is chain-of-thought prompting?", "expected_mode": "vector"}
+{"query": "Explain the Transformer architecture", "expected_mode": "vector"}
+{"query": "What dataset does the paper on LoRA use?", "expected_mode": "vector"}
+{"query": "How does retrieval-augmented generation work?", "expected_mode": "vector"}
+{"query": "What is the difference between LoRA and QLoRA?", "expected_mode": "vector"}
+{"query": "Papers about fine-tuning large language models", "expected_mode": "vector"}
