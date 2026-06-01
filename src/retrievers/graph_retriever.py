@@ -37,10 +37,14 @@ def _get_nlp():
 def _get_driver():
     global _driver
     if _driver is None:
-        _driver = GraphDatabase.driver(
-            os.environ["NEO4J_URI"],
-            auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
-        )
+        try:
+            from src.agent.connections import get_neo4j_driver
+            _driver = get_neo4j_driver()
+        except ImportError:
+            _driver = GraphDatabase.driver(
+                os.environ["NEO4J_URI"],
+                auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
+            )
     return _driver
 
 
