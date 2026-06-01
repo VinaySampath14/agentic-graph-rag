@@ -14,7 +14,8 @@
 | Neo4j knowledge graph (14,282 nodes, 19,158 edges) | ✅ Complete |
 | Community detection (Leiden, 8 communities) | ✅ Complete |
 | Qdrant vector store (dense + sparse, BGE-M3 + BM25) | ✅ Complete |
-| Three retrieval modes (vector, graph, community) | 🔄 In progress |
+| Three retrieval modes (vector, graph, community) | ✅ Complete |
+| Rule-based router (100% on 20-query validation set) | ✅ Complete |
 | LangGraph agentic loop with self-correction | 🔄 In progress |
 | FastAPI backend + Gradio demo | 🔄 In progress |
 | RAGAS evaluation + ablation study | 🔄 In progress |
@@ -48,7 +49,7 @@ Papers: arXiv CS.AI + CS.CL · Temporal CITES edges with year + venue properties
 | Relational | —           | —               | —                |
 | Thematic   | —           | —               | —                |
 
-*Results table will be filled after eval pipeline completes (Week 4).*
+*Results table will be filled after eval pipeline completes.*
 
 ## Quick start
 
