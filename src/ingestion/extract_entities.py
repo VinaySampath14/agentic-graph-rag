@@ -9,15 +9,54 @@ INPUT_DIR = Path("data/raw")
 OUTPUT_FILE = Path("data/processed/entities.jsonl")
 
 METHOD_PATTERNS = [
-    "BERT", "GPT", "GPT-2", "GPT-3", "GPT-4", "LLaMA", "LLaMA-2",
-    "Transformer", "Attention", "LoRA", "QLoRA", "RLHF", "PPO",
-    "RAG", "GraphRAG", "LightRAG", "FAISS", "BM25", "DPR",
+    # Foundation models
+    "BERT", "GPT", "GPT-2", "GPT-3", "GPT-4", "GPT-4o",
+    "LLaMA", "LLaMA-2", "LLaMA-3", "Mistral", "Mixtral",
+    "Claude", "Gemini", "PaLM", "Falcon", "Phi",
+    "Qwen", "Yi", "Baichuan", "DeepSeek", "RWKV", "Mamba",
     "T5", "RoBERTa", "ALBERT", "XLNet", "ELECTRA", "DeBERTa",
-    "CLIP", "DALL-E", "Stable Diffusion", "ViT", "ResNet",
-    "Adam", "AdamW", "SGD", "Dropout", "BatchNorm", "LayerNorm",
-    "Chain-of-Thought", "ReAct", "LangChain", "LangGraph",
-    "Neo4j", "Qdrant", "Pinecone", "Weaviate", "ChromaDB",
-    "Leiden", "Louvain", "PageRank", "Node2Vec",
+    "BLOOM", "OPT", "Pythia", "MPT",
+
+    # Architecture components
+    "Transformer", "Attention", "Multi-head Attention",
+    "Flash Attention", "Sparse Attention", "Cross-Attention",
+    "MoE", "Mixture of Experts", "SSM", "State Space Model",
+
+    # Fine-tuning / adaptation
+    "LoRA", "QLoRA", "AdaLoRA", "DoRA", "LoRAX",
+    "RLHF", "PPO", "DPO", "GRPO", "RLAIF",
+    "Instruction Tuning", "FLAN", "Alpaca", "Vicuna",
+    "Prefix Tuning", "Prompt Tuning", "P-Tuning",
+
+    # Reasoning / agents
+    "Chain-of-Thought", "CoT", "Tree of Thoughts", "ToT",
+    "ReAct", "Reflexion", "Self-Consistency",
+    "RAG", "GraphRAG", "LightRAG", "HippoRAG",
+    "LangChain", "LangGraph", "AutoGen", "CrewAI",
+
+    # Vision / multimodal
+    "CLIP", "DALL-E", "DALL-E 2", "DALL-E 3",
+    "Stable Diffusion", "ViT", "ResNet", "DINO",
+    "LLaVA", "Flamingo", "BLIP", "InstructBLIP",
+    "GPT-4V", "Gemini Vision",
+
+    # Retrieval / search
+    "FAISS", "BM25", "DPR", "ColBERT", "Contriever",
+    "Qdrant", "Pinecone", "Weaviate", "ChromaDB", "Milvus",
+
+    # Training techniques
+    "Adam", "AdamW", "SGD", "Lion",
+    "Dropout", "BatchNorm", "LayerNorm", "RMSNorm",
+    "Flash Attention", "Gradient Checkpointing",
+    "DeepSpeed", "FSDP", "ZeRO",
+
+    # Evaluation
+    "BLEU", "ROUGE", "BERTScore", "RAGAS",
+    "MMLU", "HumanEval", "GSM8K", "MATH", "HellaSwag",
+
+    # Graph / community
+    "Neo4j", "Leiden", "Louvain", "PageRank", "Node2Vec",
+    "GraphSAGE", "GAT", "GCN", "GNN",
 ]
 
 
