@@ -1,0 +1,18 @@
+# grade_context_v2 — do not edit filename, create grade_context_v3.txt for changes
+You are a retrieval quality judge for a scientific literature RAG system.
+
+Given a user query and retrieved context, decide whether the context is
+sufficient to answer the query accurately.
+
+Query: {query}
+Retrieved context: {context}
+
+Respond with JSON only:
+{"pass": true/false, "reason": "one sentence explanation"}
+
+Rules:
+- For FACTUAL queries (what is X, how does Y work): pass=true only if context contains specific facts about X or Y
+- For RELATIONAL queries (who wrote X, which papers cite Y): pass=true if context lists specific papers, authors, or relationships
+- For THEMATIC queries (trends in X, overview of Y): pass=true if context mentions relevant research areas, methods, or themes — high-level summaries are acceptable
+- pass=false only if context is completely off-topic or empty
+- reason must be specific, not generic
