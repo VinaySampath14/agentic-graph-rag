@@ -189,9 +189,7 @@ def node_community_retriever(state: AgentState) -> AgentState:
     trace = list(state["agent_trace"])
     query = state.get("rewritten_query") or state["query"]
 
-    print(f"  [DEBUG] community_retriever starting for: {query[:50]}")
     result = community_retriever.retrieve(query)
-    print(f"  [DEBUG] community_retriever done")
 
     trace.append(_trace_entry(
         "global_retriever", "retrieved",
@@ -223,7 +221,6 @@ def node_grade_context(state: AgentState) -> AgentState:
     query = state.get("rewritten_query") or state["query"]
     context = state["retrieved_context"]
 
-    print(f"  [DEBUG] grade_context starting, source_type={context.source_type if context else 'None'}")
     prompt_template = _load_prompt("grade_context_v2.txt")
     prompt = prompt_template.replace("{query}", query).replace(
         "{context}", context.context_text[:3000]
