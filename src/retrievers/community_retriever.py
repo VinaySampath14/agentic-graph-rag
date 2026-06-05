@@ -1,6 +1,7 @@
 """Global community retriever — BGE-M3 similarity against Community embeddings."""
 import json
 import os
+from pathlib import Path
 
 import numpy as np
 from dotenv import load_dotenv
@@ -12,9 +13,11 @@ from src.retrievers.models import RetrievalResult
 load_dotenv()
 
 TOP_K_COMMUNITIES = 3
+CACHE_FILE = "data/processed/community_embeddings_cache.json"
 
 _dense_model: FlagModel | None = None
 _driver = None
+_community_cache: list[dict] | None = None
 
 
 def _get_dense_model() -> FlagModel:
@@ -54,14 +57,40 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     return float(np.dot(a_arr, b_arr) / (np.linalg.norm(a_arr) * np.linalg.norm(b_arr) + 1e-10))
 
 
+def _get_communities() -> list[dict]:
+    global _community_cache
+    if _community_cache is not None:
+        return _community_cache
+
+    # Try local cache first
+    cache_path = Path(CACHE_FILE)
+    if cache_path.exists():
+        with open(cache_path, encoding="utf-8") as f:
+            _community_cache = json.load(f)
+        print(f"Loaded {len(_community_cache)} community embeddings from cache.")
+        return _community_cache
+
+    # Fetch from Neo4j and save to cache
+    print("Fetching community embeddings from Neo4j...")
+    driver = _get_driver()
+    with driver.session() as session:
+        communities = _load_community_embeddings(session)
+
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_path, "w", encoding="utf-8") as f:
+        json.dump(communities, f)
+    print(f"Cached {len(communities)} community embeddings to {cache_path}")
+
+    _community_cache = communities
+    return _community_cache
+
+
 def retrieve(query: str) -> RetrievalResult:
     model = _get_dense_model()
-    driver = _get_driver()
 
     query_embedding = model.encode([query])[0].tolist()
 
-    with driver.session() as session:
-        communities = _load_community_embeddings(session)
+    communities = _get_communities()
 
     if not communities:
         return RetrievalResult(

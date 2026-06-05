@@ -48,18 +48,30 @@ def _trace_entry(node: str, decision: str, reason: str, **extras) -> dict:
 
 
 def _groq_json(prompt: str, system: str = "") -> dict:
+    import time
     client = _get_groq()
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        temperature=0.0,
-        response_format={"type": "json_object"},
-    )
-    return json.loads(response.choices[0].message.content)
+
+    for attempt in range(3):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=messages,
+                temperature=0.0,
+                response_format={"type": "json_object"},
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as e:
+            if "429" in str(e) and attempt < 2:
+                wait = 30 * (attempt + 1)
+                print(f"  Groq rate limit — waiting {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+    raise RuntimeError("Groq failed after 3 attempts")
 
 
 # ── Out-of-domain signals ──────────────────────────────────────────────────
@@ -177,7 +189,9 @@ def node_community_retriever(state: AgentState) -> AgentState:
     trace = list(state["agent_trace"])
     query = state.get("rewritten_query") or state["query"]
 
+    print(f"  [DEBUG] community_retriever starting for: {query[:50]}")
     result = community_retriever.retrieve(query)
+    print(f"  [DEBUG] community_retriever done")
 
     trace.append(_trace_entry(
         "global_retriever", "retrieved",
@@ -209,7 +223,8 @@ def node_grade_context(state: AgentState) -> AgentState:
     query = state.get("rewritten_query") or state["query"]
     context = state["retrieved_context"]
 
-    prompt_template = _load_prompt("grade_context_v1.txt")
+    print(f"  [DEBUG] grade_context starting, source_type={context.source_type if context else 'None'}")
+    prompt_template = _load_prompt("grade_context_v2.txt")
     prompt = prompt_template.replace("{query}", query).replace(
         "{context}", context.context_text[:3000]
     )
@@ -229,7 +244,7 @@ def node_grade_context(state: AgentState) -> AgentState:
         grade.reason,
         loop_count=state["loop_count"],
         mode=context.source_type if context else "unknown",
-        prompt_version="grade_context_v1",
+        prompt_version="grade_context_v2",
     ))
 
     return {**state, "grade_result": grade, "agent_trace": trace}
@@ -256,14 +271,26 @@ def node_rewrite_query(state: AgentState) -> AgentState:
     )
 
     try:
+        import time
         client = _get_groq()
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-        )
-        rewritten = response.choices[0].message.content.strip().strip('"')
-    except Exception as e:
+        for attempt in range(3):
+            try:
+                response = client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                )
+                rewritten = response.choices[0].message.content.strip().strip('"')
+                break
+            except Exception as e:
+                if "429" in str(e) and attempt < 2:
+                    wait = 30 * (attempt + 1)
+                    print(f"  Groq rate limit — waiting {wait}s...")
+                    time.sleep(wait)
+                else:
+                    rewritten = original_query
+                    break
+    except Exception:
         rewritten = original_query
 
     trace.append(_trace_entry(
@@ -328,6 +355,20 @@ def node_generator(state: AgentState) -> AgentState:
         "answer": answer,
         "citations": citations,
         "confidence_proxy": confidence_proxy,
+        "agent_trace": trace,
+    }
+
+
+def node_force_refusal(state: AgentState) -> AgentState:
+    trace = list(state["agent_trace"])
+    trace.append(_trace_entry(
+        "force_refusal", "refused",
+        "All retrieval modes exhausted including web fallback — returning structured refusal",
+    ))
+    return {
+        **state,
+        "refused": True,
+        "refusal_reason": "Unable to find sufficient context across all retrieval modes. Please rephrase your query or try a more specific question.",
         "agent_trace": trace,
     }
 
