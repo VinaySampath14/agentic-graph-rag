@@ -13,6 +13,7 @@ from src.agent.nodes import (
     node_rewrite_query,
     node_generator,
     node_grade_answer,
+    node_force_refusal,
 )
 
 LOOP_GUARD = 3
@@ -40,11 +41,21 @@ def route_after_router(state: AgentState) -> str:
 def route_after_grade_context(state: AgentState) -> str:
     grade = state["grade_result"]
     loop_count = state["loop_count"]
+    context = state.get("retrieved_context")
+    current_mode = context.source_type if context else ""
+    mode_history = state.get("mode_history", [])
 
     if grade and grade.passed:
         return "generator"
+
+    # Web already tried and failed — structured refusal
+    if current_mode == "web" or "web" in mode_history:
+        return "force_refusal"
+
+    # Loop guard — try web as last resort
     if loop_count >= LOOP_GUARD:
         return "web_retriever"
+
     return "rewrite_query"
 
 
@@ -70,6 +81,7 @@ def build_graph() -> StateGraph:
     graph.add_node("rewrite_query", node_rewrite_query)
     graph.add_node("generator", node_generator)
     graph.add_node("grade_answer", node_grade_answer)
+    graph.add_node("force_refusal", node_force_refusal)
 
     # Entry point
     graph.set_entry_point("query_analyser")
@@ -94,12 +106,16 @@ def build_graph() -> StateGraph:
     graph.add_edge("global_retriever", "grade_context")
     graph.add_edge("web_retriever", "grade_context")
 
-    # grade_context → generator | rewrite_query | web_retriever
+    # grade_context → generator | rewrite_query | web_retriever | force_refusal
     graph.add_conditional_edges("grade_context", route_after_grade_context, {
         "generator": "generator",
         "rewrite_query": "rewrite_query",
         "web_retriever": "web_retriever",
+        "force_refusal": "force_refusal",
     })
+
+    # force_refusal → END
+    graph.add_edge("force_refusal", END)
 
     # rewrite_query → router (loop back)
     graph.add_edge("rewrite_query", "router")
