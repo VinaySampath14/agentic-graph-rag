@@ -62,10 +62,18 @@ def load_papers() -> list[dict]:
     return papers
 
 
+# Acronyms whose lowercase/mixed-case form collides with an unrelated common
+# English word or phrase (e.g. "ZeRO" the optimizer vs. "zero-shot"; "MATH" the
+# benchmark vs. the generic subject "math") — these require exact-case matching
+# to avoid false positives that case-insensitive matching would otherwise produce.
+CASE_SENSITIVE_METHODS = {"ZeRO", "MATH"}
+
+
 def extract_method_patterns(text: str) -> list[str]:
     found = []
     for method in METHOD_PATTERNS:
-        if re.search(r"\b" + re.escape(method) + r"\b", text, re.IGNORECASE):
+        flags = 0 if method in CASE_SENSITIVE_METHODS else re.IGNORECASE
+        if re.search(r"\b" + re.escape(method) + r"\b", text, flags):
             found.append(method)
     return found
 

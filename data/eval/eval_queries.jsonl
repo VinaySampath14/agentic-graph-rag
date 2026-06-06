@@ -27,33 +27,33 @@
 {"id": 27, "query": "What does Croissant Tasks propose for metadata format in reproducible machine learning evaluations?", "query_type": "factual", "expected_mode": "vector"}
 {"id": 28, "query": "What does Hista and Numca propose for state value estimation in LLM reinforcement learning?", "query_type": "factual", "expected_mode": "vector"}
 {"id": 29, "query": "Which papers did Yang Liu write?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 30, "query": "Who are the authors working on the GAT method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 31, "query": "Which authors have published papers using both GAT and RAG techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 32, "query": "Which authors have written papers that combine PPO and RAG methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 33, "query": "Which papers use the Transformer method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 34, "query": "Who are the authors working on the Attention method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 35, "query": "Which authors have published on both the GAT and ViT methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 36, "query": "Which authors have published on both GAT and PPO techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 30, "query": "Who are the authors working on the LoRA method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 31, "query": "Which authors have published on both Attention and Transformer techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 32, "query": "Which authors have published on both Attention and ViT methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 33, "query": "Which papers use the Attention method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 34, "query": "Who are the authors working on the Transformer method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 35, "query": "Which authors have published on both Attention and MoE techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 36, "query": "Which authors have published on both BLEU and ROUGE methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 37, "query": "Which papers did Wajdi Zaghouani write?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 38, "query": "Who are the authors working on the Chain-of-Thought method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 39, "query": "Which authors have published on both the ToT and CoT methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 40, "query": "Which authors have used PPO and ToT in their research papers?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 41, "query": "Which papers use the ZeRO method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 42, "query": "Who are the authors working on papers that apply GNN and ToT techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 43, "query": "Which authors have worked on papers combining Mixture-of-Experts and Tree of Thoughts approaches?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 44, "query": "Which researchers have collaborated on projects that incorporated both Attention and Chain-of-Thought reasoning?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 39, "query": "Which authors have published on both GRPO and RAG techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 40, "query": "Which authors have published on both Attention and RAG methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 41, "query": "Which papers use the RAG method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 42, "query": "Who are the authors working on papers that apply GSM8K and MMLU techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 43, "query": "Which authors have worked on papers combining Chain-of-Thought and GRPO approaches?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 44, "query": "Which researchers have collaborated on projects that incorporated both Transformer and Dropout methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 45, "query": "Which papers did Xiang Li write?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 46, "query": "Who are the authors working on the SSM method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 47, "query": "Which authors have contributed to research on both ViT and SSM techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 48, "query": "Which authors have published papers using both GAT and ZeRO techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 49, "query": "Which research papers have successfully applied both RAG and ViT methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 50, "query": "Which authors have published papers using both Transformer and GAT techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 51, "query": "Which authors have published on both the LoRA and RAG methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 52, "query": "Which papers did Wajdi Zaghouani write that use the PPO method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 46, "query": "Who are the authors working on the GRPO method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 47, "query": "Which authors have contributed to research on both GRPO and LoRA techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 48, "query": "Which authors have published papers using both Attention and GRPO techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 49, "query": "Which research papers have successfully applied both GSM8K and MATH methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 50, "query": "Which authors have published papers using both Attention and Chain-of-Thought techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 51, "query": "Which authors have published on both the CoT and GRPO methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 52, "query": "Which papers did Yu Zhang write that use the LoRA method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 53, "query": "Which papers did Xunliang Cai write?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 54, "query": "Which authors have utilized the same set of techniques, including BM25 and PPO, across multiple research papers?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 55, "query": "Which authors have published on both the Transformer and Attention methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 56, "query": "Which papers did Yang Liu write that use the RAG method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 54, "query": "Which authors have utilized the same set of techniques, including Transformer and ViT, across multiple research papers?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 55, "query": "Which authors have published on both the LoRA and BLEU methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 56, "query": "Which papers did David Mohaisen write that use the Chain-of-Thought method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 57, "query": "What are the main trends in developing and improving large language models?", "query_type": "thematic", "expected_mode": "community"}
 {"id": 58, "query": "What is an overview of research on multimodal learning?", "query_type": "thematic", "expected_mode": "community"}
 {"id": 59, "query": "How do different applications of large language models compare?", "query_type": "thematic", "expected_mode": "community"}
@@ -76,5 +76,5 @@
 {"id": 76, "query": "Give an overview of the challenges and opportunities in advancing large language models.", "query_type": "thematic", "expected_mode": "community"}
 {"id": 77, "query": "What does Evolutionary Dynamics of Cooperation propose for Next-Generation LLM Agent Systems?", "query_type": "factual", "expected_mode": "vector"}
 {"id": 78, "query": "How does Moment-KV address decode-time KV cache compression for Long Generation?", "query_type": "factual", "expected_mode": "vector"}
-{"id": 79, "query": "Which authors have published on both Attention and GAT techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 80, "query": "Which papers did Xunliang Cai write that use the RAG method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 79, "query": "Which authors have published on both CLIP and ViT techniques?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 80, "query": "Which papers did Xiao-Ping Zhang write that use the Attention method?", "query_type": "relational", "expected_mode": "graph"}
