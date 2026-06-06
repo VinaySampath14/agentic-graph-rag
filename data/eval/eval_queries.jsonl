@@ -1,0 +1,80 @@
+{"id": 1, "query": "What does Evolutionary Dynamics of Cooperation in Next-Generation LLM Agent Systems propose for cooperation?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 2, "query": "How does Moment-KV address decode-time KV cache compression?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 3, "query": "What problem does Mitigating Stethoscope-Induced Shortcuts in Respiratory Sound Classification under Federated Domain Generalization with Causality-Inspired Interventions aim to solve?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 4, "query": "What does Towards Verifiable Multimodal Deep Research propose for report generation?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 5, "query": "How does ESPO address early-stopping in policy optimization?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 6, "query": "What does MELD propose for speech language modeling?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 7, "query": "What problem does EvoRubric address in open-ended generation?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 8, "query": "How does HARP address extreme LLM quantization?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 9, "query": "What does CB-SLICE propose for error slice discovery?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 10, "query": "What does OmniMatBench propose for multimodal reasoning?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 11, "query": "What does OptSkills propose for optimization skills in problem archetypes?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 12, "query": "What does Towards Localized and Disentangled Knowledge Editing propose for knowledge editing?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 13, "query": "What does Quantifying and Optimizing Simplicity propose for simplicity optimization?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 14, "query": "What problem does Inferring Code Correctness from Specification aim to solve?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 15, "query": "How does Harnessing non-adversarial robustness address robustness in large language models?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 16, "query": "What does PRAIB propose for LLM-assisted reviewing?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 17, "query": "What problem does Data filtering methods for training language models aim to solve?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 18, "query": "What does AgentDoG 1.5 propose for AI agent safety and security?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 19, "query": "How does Nine Judges, Two Effective Votes address LLM evaluation panels?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 20, "query": "What does Metric-Dependent Annotation Saturation propose for learning from label distributions?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 21, "query": "How does SAAS address over-search mitigation in agentic search?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 22, "query": "What does SkillsInjector propose for skill context construction?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 23, "query": "What does MEMENTO propose for learning signals in low-data domains?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 24, "query": "What does ActTraitBench propose for knowledge-decision gap in large language models?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 25, "query": "What does Evolve as a Team propose for LLM-based multi-agent systems?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 26, "query": "How does Certified Policy Optimisation address nested causal bandits via PAC-Bayes risk?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 27, "query": "What does Croissant Tasks propose for metadata format in reproducible machine learning evaluations?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 28, "query": "What does Hista and Numca propose for state value estimation in LLM reinforcement learning?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 29, "query": "Which papers did Yang Liu write?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 30, "query": "Who are the authors working on the GAT method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 31, "query": "Which authors have published on both the RAG and OPT methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 32, "query": "What institutions are associated with the PPO method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 33, "query": "Which papers use the Transformer method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 34, "query": "Who are the authors working on the Attention method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 35, "query": "Which authors have published on both the MPT and MATH methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 36, "query": "What institutions are associated with the ViT method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 37, "query": "Which papers did Wajdi Zaghouani write?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 38, "query": "Who are the authors working on the Chain-of-Thought method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 39, "query": "Which authors have published on both the ToT and CoT methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 40, "query": "What institutions are associated with the LLaMA method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 41, "query": "Which papers use the ZeRO method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 42, "query": "Who are the authors working on the Qwen method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 43, "query": "Which authors have published on both the LoRA and Phi methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 44, "query": "What institutions are associated with the GPT method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 45, "query": "Which papers did Xiang Li write?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 46, "query": "Who are the authors working on the SSM method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 47, "query": "Which authors have published on both the GRPO and Gemini methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 48, "query": "What institutions are associated with the BERT method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 49, "query": "Which papers use the Yi method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 50, "query": "Who are the authors working on the Claude method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 51, "query": "Which authors have published on both the MPT and PPO methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 52, "query": "What institutions are associated with the RAG method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 53, "query": "Which papers did Xunliang Cai write?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 54, "query": "Who are the authors working on the OPT method?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 55, "query": "Which authors have published on both the Transformer and Attention methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 56, "query": "What institutions are associated with the MATH method research?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 57, "query": "What are the main trends in developing and improving large language models?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 58, "query": "What is an overview of research on multimodal learning?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 59, "query": "How do different applications of large language models compare?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 60, "query": "What are the main areas of focus for large language model research?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 61, "query": "Give an overview of the current state of large language model efficiency.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 62, "query": "How do approaches to interpretability in large language models compare across recent work?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 63, "query": "What are the main challenges in advancing large language models?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 64, "query": "Give an overview of the safety considerations for large language models.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 65, "query": "How do large language models and multimodal learning intersect?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 66, "query": "What are the current trends in large language model reliability?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 67, "query": "Give an overview of the evaluation methods for large language models.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 68, "query": "How do different domains impact the development of large language models?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 69, "query": "What are the main differences in approach between large language models and computer vision?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 70, "query": "Give an overview of the current state of large language model robustness.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 71, "query": "How do researchers prioritize efficiency in large language model development?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 72, "query": "What are the main benefits and drawbacks of multimodal learning with large language models?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 73, "query": "Give an overview of the key findings in recent large language model research.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 74, "query": "How do approaches to multimodal processing compare across different large language models?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 75, "query": "What are the current trends in large language model evaluation?", "query_type": "thematic", "expected_mode": "community"}
+{"id": 76, "query": "Give an overview of the challenges and opportunities in advancing large language models.", "query_type": "thematic", "expected_mode": "community"}
+{"id": 77, "query": "What does Evolutionary Dynamics of Cooperation propose for Next-Generation LLM Agent Systems?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 78, "query": "How does Moment-KV address decode-time KV cache compression for Long Generation?", "query_type": "factual", "expected_mode": "vector"}
+{"id": 79, "query": "What methods have been used by authors from institution X?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 80, "query": "Which authors are working on papers that use the Yi method?", "query_type": "relational", "expected_mode": "graph"}
