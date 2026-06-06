@@ -65,6 +65,12 @@ def state_to_record(qid: int, query: str, qtype: str, ref: str,
         for entry in (state.get("agent_trace") or [])
     )
 
+    # first_mode_success: answered in one pass without any rewrites
+    first_mode_success = (
+        state.get("loop_count", 0) == 0
+        and not bool(state.get("refused"))
+    )
+
     return {
         "id":               qid,
         "query":            query,
@@ -78,8 +84,9 @@ def state_to_record(qid: int, query: str, qtype: str, ref: str,
         "mode_history":     mode_history,
         "first_mode":       mode_history[0] if mode_history else "",
         "final_mode":       (context.source_type if context else ""),
+        "context_text":     (context.context_text if context else ""),
         "rewrite_triggered": rewrite_triggered,
-        "first_mode_success": (len(mode_history) == 1 and not bool(state.get("refused"))),
+        "first_mode_success": first_mode_success,
         "latency_ms":       round(latency_ms, 1),
         "agent_trace":      state.get("agent_trace") or [],
     }
