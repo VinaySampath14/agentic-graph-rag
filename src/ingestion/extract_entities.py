@@ -1,5 +1,6 @@
 """Extract named entities from paper abstracts using spaCy."""
 import json
+import re
 from pathlib import Path
 
 import spacy
@@ -9,14 +10,6 @@ INPUT_DIR = Path("data/raw")
 OUTPUT_FILE = Path("data/processed/entities.jsonl")
 
 METHOD_PATTERNS = [
-    # Foundation models
-    "BERT", "GPT", "GPT-2", "GPT-3", "GPT-4", "GPT-4o",
-    "LLaMA", "LLaMA-2", "LLaMA-3", "Mistral", "Mixtral",
-    "Claude", "Gemini", "PaLM", "Falcon", "Phi",
-    "Qwen", "Yi", "Baichuan", "DeepSeek", "RWKV", "Mamba",
-    "T5", "RoBERTa", "ALBERT", "XLNet", "ELECTRA", "DeBERTa",
-    "BLOOM", "OPT", "Pythia", "MPT",
-
     # Architecture components
     "Transformer", "Attention", "Multi-head Attention",
     "Flash Attention", "Sparse Attention", "Cross-Attention",
@@ -72,7 +65,7 @@ def load_papers() -> list[dict]:
 def extract_method_patterns(text: str) -> list[str]:
     found = []
     for method in METHOD_PATTERNS:
-        if method.lower() in text.lower():
+        if re.search(r"\b" + re.escape(method) + r"\b", text, re.IGNORECASE):
             found.append(method)
     return found
 

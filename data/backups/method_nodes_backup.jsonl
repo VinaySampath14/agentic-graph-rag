@@ -1,0 +1,322 @@
+{"name": "DeepSeek"}
+{"name": "RoBERTa"}
+{"name": "DeBERTa"}
+{"name": "Instruction Tuning"}
+{"name": "ReAct"}
+{"name": "Dropout"}
+{"name": "MoE"}
+{"name": "BM25"}
+{"name": "SGD"}
+{"name": "AdamW"}
+{"name": "BLEU"}
+{"name": "Mixture of Experts"}
+{"name": "Reflexion"}
+{"name": "GPT-2"}
+{"name": "GPT-3"}
+{"name": "Mistral"}
+{"name": "GSM8K"}
+{"name": "AdaLoRA"}
+{"name": "DoRA"}
+{"name": "LangGraph"}
+{"name": "QLoRA"}
+{"name": "Alpaca"}
+{"name": "Self-Consistency"}
+{"name": "Mamba"}
+{"name": "State Space Model"}
+{"name": "DINO"}
+{"name": "DPR"}
+{"name": "GraphRAG"}
+{"name": "ROUGE"}
+{"name": "Cross-Attention"}
+{"name": "T5"}
+{"name": "FLAN"}
+{"name": "Pythia"}
+{"name": "Sparse Attention"}
+{"name": "BERTScore"}
+{"name": "Falcon"}
+{"name": "PageRank"}
+{"name": "Neo4j"}
+{"name": "Multi-head Attention"}
+{"name": "GCN"}
+{"name": "FAISS"}
+{"name": "LLaMA-2"}
+{"name": "RWKV"}
+{"name": "HellaSwag"}
+{"name": "LayerNorm"}
+{"name": "RMSNorm"}
+{"name": "Gradient Checkpointing"}
+{"name": "FSDP"}
+{"name": "ResNet"}
+{"name": "LightRAG"}
+{"name": "HippoRAG"}
+{"name": "Flamingo"}
+{"name": "Mixtral"}
+{"name": "Baichuan"}
+{"name": "CrewAI"}
+{"name": "Mixture-of-Experts"}
+{"name": "RL (Reinforcement Learning)"}
+{"name": "windowed-FIFO scheduling"}
+{"name": "prefix-tree merging"}
+{"name": "inference optimization"}
+{"name": "End-to-end training"}
+{"name": "Quantization"}
+{"name": "TrueSkill-based rating"}
+{"name": "Trajectory logging"}
+{"name": "Deterministic offline tournament protocol (MG-Ref)"}
+{"name": "AgentDoG 1.5"}
+{"name": "AgentDoG 1.5 variants (0.8B, 2B, 4B, and 8B parameters)"}
+{"name": "Influence-function purification"}
+{"name": "RL training"}
+{"name": "SFT training"}
+{"name": "Knowledge Distillation (KD)"}
+{"name": "LoopFM (Learning frOm HistOrical ReP*resentations of FM)"}
+{"name": "Gain Decomposition"}
+{"name": "Transfer-Ratio Analysis"}
+{"name": "few-shot learning"}
+{"name": "generative capabilities"}
+{"name": "label-efficient learning"}
+{"name": "pretraining"}
+{"name": "joint scaling of model capacity and pretraining data volume"}
+{"name": "Qwen-VLA"}
+{"name": "DiT-based action decoder"}
+{"name": "embodiment-aware prompt conditioning"}
+{"name": "Risk-stratified automation"}
+{"name": "Risk Aware Diff Auto Review (RADAR)"}
+{"name": "Machine-learned Diff Risk Score"}
+{"name": "LLM-based Automated Code Review"}
+{"name": "Deterministic validation"}
+{"name": "graph-first coordination layer"}
+{"name": "multi-party organization"}
+{"name": "event-based collaboration"}
+{"name": "metering"}
+{"name": "receipts"}
+{"name": "settlement"}
+{"name": "Large Language Models (LLMs)"}
+{"name": "Gurobi"}
+{"name": "test-time evolution"}
+{"name": "one-shot"}
+{"name": "Reinforcement Learning (RL)"}
+{"name": "Vision-Language Models (VLMs)"}
+{"name": "Chain-of-Thought reasoning"}
+{"name": "expert-calibrated fine-tuning strategy"}
+{"name": "AgentSchool"}
+{"name": "Zone of Proximal Development (ZPD)"}
+{"name": "scenery generator"}
+{"name": "multi-scale simulator"}
+{"name": "sparse autoencoders"}
+{"name": "dictionary learning"}
+{"name": "scaling laws"}
+{"name": "hyperparameter selection"}
+{"name": "Automated construction framework"}
+{"name": "Expert validation"}
+{"name": "Risk analysis"}
+{"name": "PhoneWorld pipeline"}
+{"name": "AndroidWorld corpus"}
+{"name": "rule-based verifiers"}
+{"name": "training rollouts"}
+{"name": "JobBench"}
+{"name": "AI-powered scientific workflow automation"}
+{"name": "AutoResearch"}
+{"name": "Vibe Research"}
+{"name": "prompt-based assistance"}
+{"name": "human-verified execution"}
+{"name": "mixed-initiative co-research frameworks"}
+{"name": "generative retrieval"}
+{"name": "late-stage re-ranking"}
+{"name": "auxiliary signal enrichment"}
+{"name": "fine-tuned open-source LLM used as an ads-specific ancillary predictor"}
+{"name": "Contrastive Language-Image Pre-training"}
+{"name": "ECG Contrastive Language-Image Pre-training (ECGCLIP)"}
+{"name": "PRAUC (Primary metric)"}
+{"name": "Mixed-methods evaluation"}
+{"name": "Cross-sectional, anonymous clinician survey"}
+{"name": "Cronbach's α for internal consistency reliability"}
+{"name": "Large language models (LLMs)"}
+{"name": "Lean-based formal proof generation"}
+{"name": "LLM-based generation alternating with Lean-based verification"}
+{"name": "Knowledge-Skills-Attitude (KSA) framework"}
+{"name": "mid-training"}
+{"name": "supervised fine-tuning"}
+{"name": "reinforcement learning"}
+{"name": "data synthesis pipeline"}
+{"name": "curated data synthesis pipeline"}
+{"name": "unified rubric trees"}
+{"name": "ATLAS"}
+{"name": "ATLAScore"}
+{"name": "length-aware AUC scoring"}
+{"name": "Multi-Talker Audio-Video Generation (MTAVG)"}
+{"name": "Question-answering evaluation"}
+{"name": "Temporal localization of failure modes"}
+{"name": "Reinforcement Learning with Verifiable Rewards (RLVR)"}
+{"name": "Reinforcement Learning with Robust Rubric Rewards ($\text{RLR}^3$)"}
+{"name": "LLM-as-an-extractor"}
+{"name": "LLM-as-a-Judge"}
+{"name": "Hierarchical aggregation"}
+{"name": "Error tracing and attribution"}
+{"name": "Fine-grained tracing of operational information flow"}
+{"name": "Automatic attribution method"}
+{"name": "Operation subgraph tracing"}
+{"name": "VecSet framework"}
+{"name": "Mesh simplification"}
+{"name": "Cleaning"}
+{"name": "Normal baking"}
+{"name": "Fast parallel UV unwrapping"}
+{"name": "Model distillation"}
+{"name": "Kernel optimization"}
+{"name": "Pipeline parallelization"}
+{"name": "Action-World Interaction Loop"}
+{"name": "RAG (Reformer-based Attention-based Generator)"}
+{"name": "External Memory Systems"}
+{"name": "Harness-based Memory Agents"}
+{"name": "Unified Reinforcement Learning Interface"}
+{"name": "Distributed PPO-style updates"}
+{"name": "Logical Agent Roles"}
+{"name": "Graph Trajectories"}
+{"name": "User-defined Rewards"}
+{"name": "Agent--Model Mappings"}
+{"name": "ScaleAcross Explorer"}
+{"name": "parallelism placement"}
+{"name": "parallelism scheduling"}
+{"name": "network layer technologies"}
+{"name": "ConceptM$^3$oE"}
+{"name": "Mixture-of-Experts (MoE)"}
+{"name": "Residual pathways"}
+{"name": "Speckle tracking echocardiography (STE)"}
+{"name": "Deep learning"}
+{"name": "Simulation strategy"}
+{"name": "Iterative refinement process"}
+{"name": "Echocardiographic motion estimation algorithm"}
+{"name": "MLLMs"}
+{"name": "RL"}
+{"name": "VCap (Witness-Adjudicator reward)"}
+{"name": "Distillation"}
+{"name": "experience generation"}
+{"name": "skill extraction"}
+{"name": "skill consumption"}
+{"name": "model-generated skills"}
+{"name": "domain-level skills"}
+{"name": "instruction data curation pipeline"}
+{"name": "multimodal transcription"}
+{"name": "visual cue separation and scoring"}
+{"name": "instruction synthesis with quality control"}
+{"name": "visual question answering (VQA)"}
+{"name": "multi-turn conversational interactions"}
+{"name": "chain-of-thought (CoT) reasoning"}
+{"name": "SkillEvolBench"}
+{"name": "compact trajectories"}
+{"name": "verifier feedback"}
+{"name": "frozen deployment"}
+{"name": "self-generated skill evolution"}
+{"name": "curated-start skill evolution"}
+{"name": "no-skill control"}
+{"name": "raw-trajectory control"}
+{"name": "JT-Safe-V2"}
+{"name": "JT-Safe"}
+{"name": "Safe-MoMA"}
+{"name": "pre-training"}
+{"name": "post-training"}
+{"name": "Claw AI Lab"}
+{"name": "AutoResearchClaw"}
+{"name": "Claw-Code Harness"}
+{"name": "weight-space optimization"}
+{"name": "text-space optimizer"}
+{"name": "bounded add/delete/replace edits"}
+{"name": "slow/meta update"}
+{"name": "textual learning-rate budget"}
+{"name": "rejected-edit buffer"}
+{"name": "FluxMem"}
+{"name": "initial connection formation"}
+{"name": "feedback-driven refinement"}
+{"name": "long-term consolidation"}
+{"name": "missing links repair"}
+{"name": "interference pruning"}
+{"name": "abstraction granularity alignment"}
+{"name": "procedural circuits distillation"}
+{"name": "InterSketch"}
+{"name": "self-correcting mechanism"}
+{"name": "stepwise reward mechanism"}
+{"name": "reinforcement learning (RL)"}
+{"name": "reflection mechanism"}
+{"name": "schema linking"}
+{"name": "multi-hypothesis schema grounding"}
+{"name": "uncertainty-guided evidence acquisition"}
+{"name": "Statement Verification Pipeline"}
+{"name": "game outcomes evaluation"}
+{"name": "behavioral trajectories evaluation"}
+{"name": "utterance-level consistency evaluation"}
+{"name": "decaying scaffolding reward"}
+{"name": "cross-lingual medical transfer"}
+{"name": "Clinical Trust Signals (CTS) pipeline"}
+{"name": "Safety and ethics supervision"}
+{"name": "Red team stress testing"}
+{"name": "autoregressive TTS system"}
+{"name": "Q-Former-based conditioning"}
+{"name": "cross-sample paired training"}
+{"name": "zero-shot voice cloning"}
+{"name": "emotion synthesis"}
+{"name": "paralinguistic synthesis"}
+{"name": "Chinese dialect synthesis"}
+{"name": "FineVLA"}
+{"name": "steerable policy learning"}
+{"name": "robotic video understanding"}
+{"name": "VLM annotator"}
+{"name": "steerable VLA policy"}
+{"name": "proactive interaction"}
+{"name": "personalized modeling"}
+{"name": "inferring user preferences"}
+{"name": "leveraging user preferences"}
+{"name": "extracting user preferences"}
+{"name": "utilizing user preferences"}
+{"name": "updating user preferences"}
+{"name": "recognizing missing information"}
+{"name": "acquiring missing information"}
+{"name": "conformance and interoperability testing"}
+{"name": "hardening against field anomalies and diverse deployment environments"}
+{"name": "data-driven optimization of network functionalities"}
+{"name": "discovering and prototyping novel waveforms, functionalities, and capabilities for future standards"}
+{"name": "securing the stack against vulnerabilities"}
+{"name": "hallucinating Application Programming Interfaces (APIs)"}
+{"name": "mis-reading specifications"}
+{"name": "designing algorithms with simulations"}
+{"name": "converting intents into solutions"}
+{"name": "validating solutions with over-the-air experiments"}
+{"name": "Claude"}
+{"name": "OPT"}
+{"name": "MPT"}
+{"name": "LoRA"}
+{"name": "Attention"}
+{"name": "GAT"}
+{"name": "ViT"}
+{"name": "Yi"}
+{"name": "Lion"}
+{"name": "PPO"}
+{"name": "MATH"}
+{"name": "HumanEval"}
+{"name": "Transformer"}
+{"name": "RLHF"}
+{"name": "ToT"}
+{"name": "RAG"}
+{"name": "Gemini"}
+{"name": "ZeRO"}
+{"name": "Phi"}
+{"name": "MMLU"}
+{"name": "GPT"}
+{"name": "SSM"}
+{"name": "Qwen"}
+{"name": "DPO"}
+{"name": "LLaVA"}
+{"name": "CLIP"}
+{"name": "GRPO"}
+{"name": "CoT"}
+{"name": "Adam"}
+{"name": "GNN"}
+{"name": "LLaMA"}
+{"name": "BERT"}
+{"name": "ColBERT"}
+{"name": "GPT-4"}
+{"name": "GPT-4o"}
+{"name": "Stable Diffusion"}
+{"name": "Prompt Tuning"}
+{"name": "LLaMA-3"}
+{"name": "Chain-of-Thought"}
+{"name": "BLOOM"}
