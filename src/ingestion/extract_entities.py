@@ -1,5 +1,6 @@
 """Extract named entities from paper abstracts using spaCy."""
 import json
+import re
 from pathlib import Path
 
 import spacy
@@ -9,14 +10,6 @@ INPUT_DIR = Path("data/raw")
 OUTPUT_FILE = Path("data/processed/entities.jsonl")
 
 METHOD_PATTERNS = [
-    # Foundation models
-    "BERT", "GPT", "GPT-2", "GPT-3", "GPT-4", "GPT-4o",
-    "LLaMA", "LLaMA-2", "LLaMA-3", "Mistral", "Mixtral",
-    "Claude", "Gemini", "PaLM", "Falcon", "Phi",
-    "Qwen", "Yi", "Baichuan", "DeepSeek", "RWKV", "Mamba",
-    "T5", "RoBERTa", "ALBERT", "XLNet", "ELECTRA", "DeBERTa",
-    "BLOOM", "OPT", "Pythia", "MPT",
-
     # Architecture components
     "Transformer", "Attention", "Multi-head Attention",
     "Flash Attention", "Sparse Attention", "Cross-Attention",
@@ -69,10 +62,18 @@ def load_papers() -> list[dict]:
     return papers
 
 
+# Acronyms whose lowercase/mixed-case form collides with an unrelated common
+# English word or phrase (e.g. "ZeRO" the optimizer vs. "zero-shot"; "MATH" the
+# benchmark vs. the generic subject "math") — these require exact-case matching
+# to avoid false positives that case-insensitive matching would otherwise produce.
+CASE_SENSITIVE_METHODS = {"ZeRO", "MATH"}
+
+
 def extract_method_patterns(text: str) -> list[str]:
     found = []
     for method in METHOD_PATTERNS:
-        if method.lower() in text.lower():
+        flags = 0 if method in CASE_SENSITIVE_METHODS else re.IGNORECASE
+        if re.search(r"\b" + re.escape(method) + r"\b", text, flags):
             found.append(method)
     return found
 

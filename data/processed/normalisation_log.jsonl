@@ -58,8 +58,8 @@
 {"arxiv_id": "2605.27239", "type": "org_filtered", "original": "κ$."}
 {"arxiv_id": "2605.27030", "type": "org_filtered", "original": "\\textbf{Collaborative Parallel Thinking (CPT"}
 {"arxiv_id": "2605.27003", "type": "org_filtered", "original": "0.9\\%"}
-{"arxiv_id": "2605.27000", "type": "org_filtered", "original": "pass@$K$"}
 {"arxiv_id": "2605.27000", "type": "org_filtered", "original": "Coordinated Pass@$K$ Policy Optimization"}
+{"arxiv_id": "2605.27000", "type": "org_filtered", "original": "pass@$K$"}
 {"arxiv_id": "2605.27000", "type": "person_filtered", "original": "R_{\\mathrm{out}}$"}
 {"arxiv_id": "2605.26952", "type": "org_filtered", "original": "+1.85"}
 {"arxiv_id": "2605.26935", "type": "org_filtered", "original": "52k"}
@@ -78,12 +78,12 @@
 {"arxiv_id": "2605.25985", "type": "org_filtered", "original": "\\mathcal{E}^k$"}
 {"arxiv_id": "2605.25981", "type": "org_filtered", "original": "Welch $"}
 {"arxiv_id": "2605.25969", "type": "org_filtered", "original": "$B^3D-RWKV$"}
-{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "50M"}
-{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "350M"}
+{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "30M"}
 {"arxiv_id": "2605.25966", "type": "org_filtered", "original": "15M-100M"}
 {"arxiv_id": "2605.25966", "type": "org_filtered", "original": "100M"}
+{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "50M"}
+{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "350M"}
 {"arxiv_id": "2605.25966", "type": "org_filtered", "original": "175M"}
-{"arxiv_id": "2605.25966", "type": "org_filtered", "original": "30M"}
 {"arxiv_id": "2605.25931", "type": "org_filtered", "original": "0.5B"}
 {"arxiv_id": "2605.25891", "type": "org_normalised", "original": "Causal Tongue-Tie:", "canonical": "Causal Tongue-Tie"}
 {"arxiv_id": "2605.25861", "type": "org_filtered", "original": "3D human mesh"}
@@ -132,14 +132,14 @@
 {"arxiv_id": "2605.23061", "type": "org_filtered", "original": "772M"}
 {"arxiv_id": "2605.23061", "type": "org_filtered", "original": "125M"}
 {"arxiv_id": "2605.23057", "type": "org_filtered", "original": "0.48x"}
-{"arxiv_id": "2605.24042", "type": "org_filtered", "original": "O(1)$ Fisher"}
 {"arxiv_id": "2605.24042", "type": "org_filtered", "original": "90M"}
+{"arxiv_id": "2605.24042", "type": "org_filtered", "original": "O(1)$ Fisher"}
 {"arxiv_id": "2605.28860", "type": "org_filtered", "original": "\\cite{shenfeld2025rl"}
 {"arxiv_id": "2605.22800", "type": "person_filtered", "original": "Sigma_task"}
 {"arxiv_id": "2605.22795", "type": "org_filtered", "original": "\\R^d$"}
 {"arxiv_id": "2605.22776", "type": "org_filtered", "original": "\\mathbb{P}(T"}
-{"arxiv_id": "2605.22714", "type": "org_filtered", "original": "Opus -0.17"}
 {"arxiv_id": "2605.22714", "type": "org_filtered", "original": "Nano -0.34"}
+{"arxiv_id": "2605.22714", "type": "org_filtered", "original": "Opus -0.17"}
 {"arxiv_id": "2605.22714", "type": "person_filtered", "original": "-0.17"}
 {"arxiv_id": "2605.22714", "type": "person_filtered", "original": "GPT-5.2 -0.17"}
 {"arxiv_id": "2605.22714", "type": "person_filtered", "original": "-0.22"}
