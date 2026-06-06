@@ -32,12 +32,12 @@
 {"id": 32, "query": "Which authors have written papers that combine PPO and RAG methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 33, "query": "Which papers use the Transformer method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 34, "query": "Who are the authors working on the Attention method?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 35, "query": "Which authors have published on both the MPT and MATH methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 35, "query": "Which authors have published on both the GAT and ViT methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 36, "query": "Which authors have published on both GAT and PPO techniques?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 37, "query": "Which papers did Wajdi Zaghouani write?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 38, "query": "Who are the authors working on the Chain-of-Thought method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 39, "query": "Which authors have published on both the ToT and CoT methods?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 40, "query": "Which authors have used GraphSAGE and PPO in their research papers?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 40, "query": "Which authors have used PPO and ToT in their research papers?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 41, "query": "Which papers use the ZeRO method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 42, "query": "Who are the authors working on papers that apply GNN and ToT techniques?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 43, "query": "Which authors have worked on papers combining Mixture-of-Experts and Tree of Thoughts approaches?", "query_type": "relational", "expected_mode": "graph"}
@@ -46,9 +46,9 @@
 {"id": 46, "query": "Who are the authors working on the SSM method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 47, "query": "Which authors have contributed to research on both ViT and SSM techniques?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 48, "query": "Which authors have published papers using both GAT and ZeRO techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 49, "query": "Which research papers have successfully applied both Contriever and GAT methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 49, "query": "Which research papers have successfully applied both RAG and ViT methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 50, "query": "Which authors have published papers using both Transformer and GAT techniques?", "query_type": "relational", "expected_mode": "graph"}
-{"id": 51, "query": "Which authors have published on both the MPT and PPO methods?", "query_type": "relational", "expected_mode": "graph"}
+{"id": 51, "query": "Which authors have published on both the LoRA and RAG methods?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 52, "query": "Which papers did Wajdi Zaghouani write that use the PPO method?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 53, "query": "Which papers did Xunliang Cai write?", "query_type": "relational", "expected_mode": "graph"}
 {"id": 54, "query": "Which authors have utilized the same set of techniques, including BM25 and PPO, across multiple research papers?", "query_type": "relational", "expected_mode": "graph"}
