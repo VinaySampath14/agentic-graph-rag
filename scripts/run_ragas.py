@@ -7,11 +7,15 @@ Metrics (all 0-1):
   context_recall    — does the retrieved context cover the key points in the reference answer?
 
 Refused queries are excluded from scoring (Option B).
-Results saved to data/eval/ragas_scores.jsonl + summary printed to stdout.
+Results saved to data/eval/ragas_scores_{version}.jsonl + summary printed to stdout.
 
 Usage:
-    python scripts/run_ragas.py
+    python scripts/run_ragas.py                  # v4 (default)
+    python scripts/run_ragas.py --version v1
+    python scripts/run_ragas.py --version v2
+    python scripts/run_ragas.py --version v3
 """
+import argparse
 import json
 import os
 import time
@@ -22,10 +26,8 @@ from openai import OpenAI
 
 load_dotenv()
 
-RAW_FILE    = Path("data/eval/eval_results_raw.jsonl")
-OUTPUT_FILE = Path("data/eval/ragas_scores.jsonl")
-MODEL       = "gpt-4o-mini"
-SLEEP       = 1.0   # seconds between API calls
+MODEL = "gpt-4o-mini"
+SLEEP = 1.0   # seconds between API calls
 
 
 # ── Prompts ────────────────────────────────────────────────────────────────
@@ -169,19 +171,19 @@ def score_record(client: OpenAI, rec: dict) -> dict:
 
 # ── Main ───────────────────────────────────────────────────────────────────
 
-def load_records() -> list[dict]:
+def load_records(raw_file: Path) -> list[dict]:
     records = []
-    with open(RAW_FILE, encoding="utf-8") as f:
+    with open(raw_file, encoding="utf-8") as f:
         for line in f:
             records.append(json.loads(line))
     return records
 
 
-def load_scored_ids() -> set[int]:
-    if not OUTPUT_FILE.exists():
+def load_scored_ids(output_file: Path) -> set[int]:
+    if not output_file.exists():
         return set()
     done = set()
-    with open(OUTPUT_FILE, encoding="utf-8") as f:
+    with open(output_file, encoding="utf-8") as f:
         for line in f:
             done.add(json.loads(line)["id"])
     return done
@@ -221,16 +223,24 @@ def print_summary(scores: list[dict]) -> None:
 
 
 def main() -> None:
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--version", default="v4", choices=["v1","v2","v3","v4"])
+    args = parser.parse_args()
+
+    version     = args.version
+    raw_file    = Path(f"data/eval/eval_results_{version}.jsonl")
+    output_file = Path(f"data/eval/ragas_scores_{version}.jsonl")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
     client = OpenAI()
 
-    records    = load_records()
+    records    = load_records(raw_file)
     answered   = [r for r in records if not r["refused"]]
     refused    = [r for r in records if r["refused"]]
-    scored_ids = load_scored_ids()
+    scored_ids = load_scored_ids(output_file)
     pending    = [r for r in answered if r["id"] not in scored_ids]
 
-    print(f"Total: {len(records)} | Answered: {len(answered)} | Refused: {len(refused)}")
+    print(f"Version: {version} | Answered: {len(answered)} | Refused: {len(refused)}")
     print(f"Already scored: {len(scored_ids)} | Remaining: {len(pending)}")
 
     if not pending:
@@ -241,12 +251,12 @@ def main() -> None:
             scored = score_record(client, rec)
             print(f"  F={scored['faithfulness']:.3f} R={scored['answer_relevancy']:.3f} "
                   f"CP={scored['context_precision']:.3f} CR={scored['context_recall']:.3f}")
-            with open(OUTPUT_FILE, "a", encoding="utf-8") as f:
+            with open(output_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(scored, ensure_ascii=False) + "\n")
 
     # Load all scores and print summary
     all_scores = []
-    with open(OUTPUT_FILE, encoding="utf-8") as f:
+    with open(output_file, encoding="utf-8") as f:
         for line in f:
             all_scores.append(json.loads(line))
 
@@ -255,7 +265,7 @@ def main() -> None:
     # Refusal rate report
     print("\nREFUSAL RATE")
     from collections import Counter
-    ref_by_type = Counter(r["query_type"] for r in refused)
+    ref_by_type   = Counter(r["query_type"] for r in refused)
     total_by_type = Counter(r["query_type"] for r in records)
     for qtype in ["factual", "relational", "thematic"]:
         n_ref = ref_by_type.get(qtype, 0)
