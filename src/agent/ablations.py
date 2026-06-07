@@ -116,10 +116,20 @@ def compile_v2():
 # Full loop but on grade_context fail → router directly with original query.
 # rewrite_query node is bypassed.
 
+def _increment_loop_v3(state: AgentState) -> dict:
+    """Increment loop_count and add current mode to mode_history (rewrite_query's job in v4)."""
+    context      = state.get("retrieved_context")
+    current_mode = context.source_type if context else ""
+    history      = list(state.get("mode_history") or [])
+    if current_mode and current_mode not in history:
+        history.append(current_mode)
+    return {"loop_count": state.get("loop_count", 0) + 1, "mode_history": history}
+
+
 def _route_after_grade_context_v3(state: AgentState) -> str:
-    grade       = state["grade_result"]
-    loop_count  = state["loop_count"]
-    context     = state.get("retrieved_context")
+    grade        = state["grade_result"]
+    loop_count   = state["loop_count"]
+    context      = state.get("retrieved_context")
     current_mode = context.source_type if context else ""
     mode_history = state.get("mode_history", [])
 
@@ -130,7 +140,7 @@ def _route_after_grade_context_v3(state: AgentState) -> str:
     if loop_count >= LOOP_GUARD:
         return "web_retriever"
     # Re-route with original query — no rewrite
-    return "router"
+    return "loop_incrementer"
 
 
 def compile_v3():
@@ -143,6 +153,7 @@ def compile_v3():
     graph.add_node("global_retriever",     node_community_retriever)
     graph.add_node("web_retriever",        node_web_retriever)
     graph.add_node("grade_context",        node_grade_context)
+    graph.add_node("loop_incrementer",     _increment_loop_v3)
     graph.add_node("generator",            node_generator)
     graph.add_node("grade_answer",         node_grade_answer)
     graph.add_node("force_refusal",        node_force_refusal)
@@ -164,14 +175,15 @@ def compile_v3():
         graph.add_edge(node, "grade_context")
 
     graph.add_conditional_edges("grade_context", _route_after_grade_context_v3, {
-        "generator":    "generator",
-        "router":       "router",       # loop back without rewrite
-        "web_retriever":"web_retriever",
-        "force_refusal":"force_refusal",
+        "generator":       "generator",
+        "loop_incrementer":"loop_incrementer",  # increment then re-route
+        "web_retriever":   "web_retriever",
+        "force_refusal":   "force_refusal",
     })
 
-    graph.add_edge("force_refusal", END)
-    graph.add_edge("generator",     "grade_answer")
+    graph.add_edge("loop_incrementer", "router")   # re-route with original query
+    graph.add_edge("force_refusal",    END)
+    graph.add_edge("generator",        "grade_answer")
     graph.add_conditional_edges("grade_answer", _route_after_grade_answer, {END: END})
 
     return graph.compile()
