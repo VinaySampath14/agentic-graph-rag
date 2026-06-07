@@ -18,7 +18,7 @@ from pathlib import Path
 
 QUERIES_FILE  = Path("data/eval/eval_queries_validated.jsonl")
 ANSWERS_FILE  = Path("data/eval/reference_answers.jsonl")
-SLEEP_BETWEEN = 2        # seconds — stay within Groq 30 req/min
+SLEEP_BETWEEN = 15       # seconds — v3/v4 make 4-5 Groq calls per query; needs more buffer
 CHECKPOINT_N  = 10       # flush to disk every N queries
 
 
