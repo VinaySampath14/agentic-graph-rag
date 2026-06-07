@@ -3,21 +3,38 @@
 Checkpoints every 10 queries so a crash mid-run doesn't lose work.
 Resume by re-running — already-completed query ids are skipped.
 
-Output: data/eval/eval_results_raw.jsonl
-Each line: query_id, query, query_type, answer, refused, refusal_reason,
-           citations, loop_count, mode_history, agent_trace, latency_ms
+Usage:
+    python scripts/run_eval.py           # v4 (full system, default)
+    python scripts/run_eval.py --version v1
+    python scripts/run_eval.py --version v2
+    python scripts/run_eval.py --version v3
+
+Output: data/eval/eval_results_{version}.jsonl
 """
+import argparse
 import json
 import time
 from pathlib import Path
 
-from src.agent.graph import compile_graph
-
 QUERIES_FILE  = Path("data/eval/eval_queries_validated.jsonl")
 ANSWERS_FILE  = Path("data/eval/reference_answers.jsonl")
-OUTPUT_FILE   = Path("data/eval/eval_results_raw.jsonl")
 SLEEP_BETWEEN = 2        # seconds — stay within Groq 30 req/min
 CHECKPOINT_N  = 10       # flush to disk every N queries
+
+
+def get_graph(version: str):
+    if version == "v1":
+        from src.agent.ablations import compile_v1
+        return compile_v1()
+    elif version == "v2":
+        from src.agent.ablations import compile_v2
+        return compile_v2()
+    elif version == "v3":
+        from src.agent.ablations import compile_v3
+        return compile_v3()
+    else:
+        from src.agent.graph import compile_graph
+        return compile_graph()
 
 
 def load_queries() -> list[dict]:
@@ -37,11 +54,11 @@ def load_reference_answers() -> dict[int, str]:
     return refs
 
 
-def load_completed_ids() -> set[int]:
-    if not OUTPUT_FILE.exists():
+def load_completed_ids(output_file: Path) -> set[int]:
+    if not output_file.exists():
         return set()
     done = set()
-    with open(OUTPUT_FILE, encoding="utf-8") as f:
+    with open(output_file, encoding="utf-8") as f:
         for line in f:
             rec = json.loads(line)
             done.add(rec["id"])
@@ -93,23 +110,30 @@ def state_to_record(qid: int, query: str, qtype: str, ref: str,
 
 
 def main() -> None:
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--version", default="v4", choices=["v1","v2","v3","v4"])
+    args = parser.parse_args()
+
+    version     = args.version
+    output_file = Path(f"data/eval/eval_results_{version}.jsonl")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
 
     queries  = load_queries()
     refs     = load_reference_answers()
-    done_ids = load_completed_ids()
+    done_ids = load_completed_ids(output_file)
 
     pending = [q for q in queries if q["id"] not in done_ids]
     total   = len(queries)
 
+    print(f"Version: {version} | Output: {output_file}")
     print(f"Total queries: {total} | Already done: {len(done_ids)} | Remaining: {len(pending)}")
 
     if not pending:
-        print("All queries already complete. Delete eval_results_raw.jsonl to re-run.")
+        print(f"All queries already complete. Delete {output_file} to re-run.")
         return
 
-    graph = compile_graph()
-    print("Agent compiled. Starting eval...\n")
+    graph = get_graph(version)
+    print(f"Agent ({version}) compiled. Starting eval...\n")
 
     buffer: list[dict] = []
     completed = 0
@@ -143,7 +167,7 @@ def main() -> None:
 
         # Checkpoint every N queries
         if completed % CHECKPOINT_N == 0:
-            with open(OUTPUT_FILE, "a", encoding="utf-8") as f:
+            with open(output_file, "a", encoding="utf-8") as f:
                 for rec in buffer:
                     f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             print(f"  [checkpoint] flushed {len(buffer)} records to disk")
@@ -154,12 +178,12 @@ def main() -> None:
 
     # Flush any remaining
     if buffer:
-        with open(OUTPUT_FILE, "a", encoding="utf-8") as f:
+        with open(output_file, "a", encoding="utf-8") as f:
             for rec in buffer:
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         print(f"  [final flush] {len(buffer)} records")
 
-    print(f"\nDone. Results saved to {OUTPUT_FILE}")
+    print(f"\nDone. Results saved to {output_file}")
     print(f"Total completed: {len(done_ids) + completed}/{total}")
 
 
