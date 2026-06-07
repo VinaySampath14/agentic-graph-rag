@@ -55,6 +55,7 @@ def _groq_json(prompt: str, system: str = "") -> dict:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
+    time.sleep(3)  # 3s pre-call pause — prevents rapid-fire calls within a single query
     for attempt in range(3):
         try:
             response = client.chat.completions.create(
