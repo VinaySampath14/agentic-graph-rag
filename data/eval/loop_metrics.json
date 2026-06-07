@@ -1,0 +1,97 @@
+{
+  "loop_efficiency": {
+    "factual": {
+      "n_answered": 29,
+      "avg_loop_count": 0.276,
+      "pct_first_mode_success": 82.8,
+      "pct_rewrite_triggered": 17.2,
+      "loop_dist": {
+        "0": 24,
+        "1": 2,
+        "2": 3
+      },
+      "final_mode_dist": {
+        "vector": 27,
+        "community": 2
+      }
+    },
+    "relational": {
+      "n_answered": 16,
+      "avg_loop_count": 0.625,
+      "pct_first_mode_success": 62.5,
+      "pct_rewrite_triggered": 37.5,
+      "loop_dist": {
+        "0": 10,
+        "2": 4,
+        "1": 2
+      },
+      "final_mode_dist": {
+        "graph": 10,
+        "community": 4,
+        "vector": 2
+      }
+    },
+    "thematic": {
+      "n_answered": 20,
+      "avg_loop_count": 0.3,
+      "pct_first_mode_success": 75.0,
+      "pct_rewrite_triggered": 25.0,
+      "loop_dist": {
+        "0": 15,
+        "1": 4,
+        "2": 1
+      },
+      "final_mode_dist": {
+        "community": 16,
+        "vector": 4
+      }
+    },
+    "overall": {
+      "n_answered": 65,
+      "n_refused": 15,
+      "avg_loop_count": 0.369,
+      "pct_first_mode_success": 75.4,
+      "pct_rewrite_triggered": 24.6,
+      "loop_dist": {
+        "0": 49,
+        "1": 8,
+        "2": 8
+      }
+    }
+  },
+  "router_accuracy": {
+    "factual": {
+      "n": 30,
+      "correct": 26,
+      "accuracy_pct": 86.7
+    },
+    "relational": {
+      "n": 30,
+      "correct": 30,
+      "accuracy_pct": 100.0
+    },
+    "thematic": {
+      "n": 20,
+      "correct": 11,
+      "accuracy_pct": 55.0
+    },
+    "overall": {
+      "n": 80,
+      "correct": 67,
+      "accuracy_pct": 83.8
+    }
+  },
+  "confusion_matrix": {
+    "vector": {
+      "vector": 26,
+      "graph": 4
+    },
+    "graph": {
+      "graph": 30
+    },
+    "community": {
+      "community": 11,
+      "vector": 9
+    }
+  }
+}
