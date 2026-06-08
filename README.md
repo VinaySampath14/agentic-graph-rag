@@ -27,9 +27,9 @@ pinned: false
 | Qdrant vector store (dense + sparse, BGE-M3 + BM25) | ✅ Complete |
 | Three retrieval modes (vector, graph, community) | ✅ Complete |
 | Rule-based router (100% on 20-query validation set) | ✅ Complete |
-| LangGraph agentic loop with self-correction | 🔄 In progress |
-| FastAPI backend + Gradio demo | 🔄 In progress |
-| RAGAS evaluation + ablation study | 🔄 In progress |
+| LangGraph agentic loop with self-correction | ✅ Complete |
+| FastAPI backend + Gradio demo | ✅ Complete |
+| RAGAS evaluation + ablation study (80 queries, 4 versions) | ✅ Complete |
 
 ## What it does
 
@@ -54,13 +54,27 @@ Papers: arXiv CS.AI + CS.CL · Temporal CITES edges with year + venue properties
 
 ## Results
 
-| Query type | Faithfulness | Answer relevancy | Context precision |
-|------------|-------------|-----------------|------------------|
-| Factual    | —           | —               | —                |
-| Relational | —           | —               | —                |
-| Thematic   | —           | —               | —                |
+Full system (v4) — 80 queries across 3 types, GPT-4o-mini as RAGAS judge.
 
-*Results table will be filled after eval pipeline completes.*
+### Coverage by version
+
+| Version | Overall | Factual | Relational | Thematic |
+|---------|---------|---------|------------|----------|
+| v1 — Naive vector | 37.5% | 93.3% | 6.7% | 0.0% |
+| v2 — Static routing | 28.7% | 6.7% | 36.7% | 50.0% |
+| v3 — Loop, no rewrite | 27.5% | 10.0% | 16.7% | 70.0% |
+| **v4 — Full system** | **81.2%** | **96.7%** | **53.3%** | **100%** |
+
+### v4 RAGAS scores by query type
+
+| Query type | Coverage | Faithfulness | Answer relevancy | Context precision |
+|------------|----------|-------------|-----------------|------------------|
+| Factual    | 96.7%    | 0.966       | 0.890           | 0.907            |
+| Relational | 53.3%    | 0.438       | 0.738           | 0.363            |
+| Thematic   | 100.0%   | 0.812       | 0.685           | 0.660            |
+| **Overall** | **81.2%** | **0.789** | **0.789**      | **0.697**        |
+
+Key finding: adding a correction loop *without* query rewriting (v3) gives **no coverage gain** over naive retrieval (27.5% vs 37.5%). Adding **mode-aware rewriting** (v4) recovers coverage to **81.2%** — rewriting is the critical mechanism, not the loop structure.
 
 ## Quick start
 
