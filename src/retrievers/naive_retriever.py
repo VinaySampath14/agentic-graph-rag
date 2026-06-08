@@ -2,12 +2,12 @@
 import os
 
 from dotenv import load_dotenv
-from FlagEmbedding import FlagModel
 from fastembed import SparseTextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import Prefetch, FusionQuery, Fusion
 from sentence_transformers import CrossEncoder
 
+from src.agent.connections import get_dense_model
 from src.retrievers.models import RetrievalResult
 
 load_dotenv()
@@ -17,17 +17,9 @@ TOP_K_CANDIDATES = 20
 TOP_K_FINAL = 5
 RERANK_MARGIN_THRESHOLD = 0.15
 
-_dense_model: FlagModel | None = None
 _sparse_model: SparseTextEmbedding | None = None
 _cross_encoder: CrossEncoder | None = None
 _qdrant_client: QdrantClient | None = None
-
-
-def _get_dense_model() -> FlagModel:
-    global _dense_model
-    if _dense_model is None:
-        _dense_model = FlagModel("BAAI/bge-m3", use_fp16=True, normalize_embeddings=True)
-    return _dense_model
 
 
 def _get_sparse_model() -> SparseTextEmbedding:
@@ -55,7 +47,7 @@ def _get_qdrant_client() -> QdrantClient:
 
 
 def retrieve(query: str) -> RetrievalResult:
-    dense_model = _get_dense_model()
+    dense_model = get_dense_model()
     sparse_model = _get_sparse_model()
     client = _get_qdrant_client()
 
