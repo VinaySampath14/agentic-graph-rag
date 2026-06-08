@@ -5,9 +5,9 @@ from pathlib import Path
 
 import numpy as np
 from dotenv import load_dotenv
-from FlagEmbedding import FlagModel
 from neo4j import GraphDatabase
 
+from src.agent.connections import get_dense_model
 from src.retrievers.models import RetrievalResult
 
 load_dotenv()
@@ -15,16 +15,8 @@ load_dotenv()
 TOP_K_COMMUNITIES = 3
 CACHE_FILE = "data/processed/community_embeddings_cache.json"
 
-_dense_model: FlagModel | None = None
 _driver = None
 _community_cache: list[dict] | None = None
-
-
-def _get_dense_model() -> FlagModel:
-    global _dense_model
-    if _dense_model is None:
-        _dense_model = FlagModel("BAAI/bge-m3", use_fp16=True, normalize_embeddings=True)
-    return _dense_model
 
 
 def _get_driver():
@@ -86,7 +78,7 @@ def _get_communities() -> list[dict]:
 
 
 def retrieve(query: str) -> RetrievalResult:
-    model = _get_dense_model()
+    model = get_dense_model()
 
     query_embedding = model.encode([query])[0].tolist()
 

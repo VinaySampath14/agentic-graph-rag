@@ -1,4 +1,4 @@
-"""Singleton connections — initialised once at startup, reused across all requests."""
+"""Singleton connections and shared models — initialised once at startup."""
 import os
 
 from dotenv import load_dotenv
@@ -9,6 +9,7 @@ load_dotenv()
 
 _neo4j_driver = None
 _qdrant_client = None
+_dense_model = None
 
 
 def get_neo4j_driver():
@@ -30,6 +31,14 @@ def get_qdrant_client() -> QdrantClient:
             api_key=os.environ["QDRANT_API_KEY"],
         )
     return _qdrant_client
+
+
+def get_dense_model():
+    global _dense_model
+    if _dense_model is None:
+        from FlagEmbedding import FlagModel
+        _dense_model = FlagModel("BAAI/bge-m3", use_fp16=True, normalize_embeddings=True)
+    return _dense_model
 
 
 def close_all() -> None:
