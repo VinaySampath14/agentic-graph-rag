@@ -1,26 +1,16 @@
-"""Gradio demo for Agentic Graph RAG.
+"""HuggingFace Spaces entrypoint — calls agent directly (no FastAPI server needed).
 
-Tabs:
-  1. Ask — submit a query, see the answer + agent trace
-  2. Eval Results — coverage and RAGAS scores across ablation versions
-  3. About — system description and architecture
-
-Usage:
-    python src/demo/app.py
-    or via HuggingFace Spaces (app.py at repo root)
+For local development with the FastAPI backend, use src/demo/app.py instead.
 """
 import json
-import os
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import gradio as gr
-import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-
-API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 EXAMPLE_QUERIES = [
     "What is Retrieval-Augmented Generation?",
@@ -28,7 +18,6 @@ EXAMPLE_QUERIES = [
     "What are the main trends in LLM safety research?",
     "How do attention mechanisms work in transformers?",
     "What methods are used for parameter-efficient fine-tuning?",
-    "Which authors have published on both RAG and graph neural networks?",
 ]
 
 EVAL_DIR = Path("data/eval")
@@ -41,7 +30,11 @@ VERSION_LABELS = {
 }
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+@lru_cache(maxsize=1)
+def get_graph():
+    from src.agent.graph import compile_graph
+    return compile_graph()
+
 
 def _format_trace(trace: list[dict]) -> str:
     if not trace:
@@ -78,7 +71,7 @@ def _load_eval_summary() -> str:
         answered = sum(1 for r in raw if not r.get("refused", False))
         coverage = answered / len(raw) if raw else 0
 
-        def avg(key):
+        def avg(key, scores=scores):
             vals = [s[key] for s in scores if key in s]
             return sum(vals) / len(vals) if vals else 0.0
 
@@ -93,46 +86,53 @@ def _load_eval_summary() -> str:
     return "\n".join(rows)
 
 
-# ── Tab 1: Ask ─────────────────────────────────────────────────────────────
-
 def run_query(query: str):
     if not query.strip():
         return "Please enter a question.", "", ""
 
+    graph = get_graph()
+    initial_state = {
+        "query": query,
+        "rewritten_query": query,
+        "intent": "",
+        "retrieved_context": None,
+        "grade_result": None,
+        "answer": "",
+        "citations": [],
+        "confidence_proxy": 0.0,
+        "loop_count": 0,
+        "mode_history": [],
+        "agent_trace": [],
+        "low_confidence": False,
+        "fallback_mode": None,
+        "refused": False,
+        "refusal_reason": "",
+    }
+
+    t0 = time.perf_counter()
     try:
-        t0 = time.perf_counter()
-        resp = requests.post(f"{API_URL}/query", json={"query": query}, timeout=120)
-        resp.raise_for_status()
-        data = resp.json()
-    except requests.exceptions.ConnectionError:
-        return "**Error:** Cannot connect to the API. Make sure the FastAPI server is running.", "", ""
+        final_state = graph.invoke(initial_state)
     except Exception as e:
         return f"**Error:** {e}", "", ""
+    latency_ms = round((time.perf_counter() - t0) * 1000, 1)
 
-    answer = data.get("answer", "")
-    refused = data.get("refused", False)
-    refusal_reason = data.get("refusal_reason", "")
-    loop_count = data.get("loop_count", 0)
-    mode_history = data.get("mode_history", [])
-    latency_ms = data.get("latency_ms", 0)
-    trace = data.get("agent_trace", [])
+    refused = final_state.get("refused", False)
+    answer = final_state.get("answer", "")
+    refusal_reason = final_state.get("refusal_reason", "")
+    loop_count = final_state.get("loop_count", 0)
+    mode_history = final_state.get("mode_history", [])
+    trace = final_state.get("agent_trace", [])
 
-    if refused:
-        answer_md = f"**Refused:** {refusal_reason}"
-    else:
-        answer_md = answer
-
+    answer_md = f"**Refused:** {refusal_reason}" if refused else answer
     meta_md = (
         f"**Loops:** {loop_count} &nbsp;|&nbsp; "
         f"**Modes tried:** {' → '.join(mode_history) if mode_history else 'none'} &nbsp;|&nbsp; "
         f"**Latency:** {latency_ms:.0f} ms"
     )
-
-    trace_md = _format_trace(trace)
-    return answer_md, meta_md, trace_md
+    return answer_md, meta_md, _format_trace(trace)
 
 
-# ── Build UI ───────────────────────────────────────────────────────────────
+# ── UI ─────────────────────────────────────────────────────────────────────
 
 with gr.Blocks(title="Agentic Graph RAG") as demo:
     gr.Markdown(
@@ -144,7 +144,6 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
 
     with gr.Tabs():
 
-        # ── Tab 1: Ask ─────────────────────────────────────────────────────
         with gr.Tab("Ask"):
             with gr.Row():
                 query_box = gr.Textbox(
@@ -155,11 +154,7 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
                 )
                 submit_btn = gr.Button("Ask", variant="primary", scale=1)
 
-            gr.Examples(
-                examples=EXAMPLE_QUERIES,
-                inputs=query_box,
-                label="Example queries",
-            )
+            gr.Examples(examples=EXAMPLE_QUERIES, inputs=query_box, label="Example queries")
 
             answer_out = gr.Markdown(label="Answer")
             meta_out   = gr.Markdown(label="")
@@ -167,26 +162,16 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
             with gr.Accordion("Agent trace", open=False):
                 trace_out = gr.Markdown()
 
-            submit_btn.click(
-                fn=run_query,
-                inputs=query_box,
-                outputs=[answer_out, meta_out, trace_out],
-            )
-            query_box.submit(
-                fn=run_query,
-                inputs=query_box,
-                outputs=[answer_out, meta_out, trace_out],
-            )
+            submit_btn.click(fn=run_query, inputs=query_box, outputs=[answer_out, meta_out, trace_out])
+            query_box.submit(fn=run_query, inputs=query_box, outputs=[answer_out, meta_out, trace_out])
 
-        # ── Tab 2: Eval Results ────────────────────────────────────────────
         with gr.Tab("Eval Results"):
             gr.Markdown("## Ablation Results — 80 queries (30 factual / 30 relational / 20 thematic)")
             gr.Markdown(
-                "Coverage = fraction of queries answered (not refused). "
-                "RAGAS scores computed on answered queries only with GPT-4o-mini as judge."
+                "Coverage = fraction of queries answered. "
+                "RAGAS scores on answered queries only, GPT-4o-mini as judge."
             )
-            eval_table = gr.Markdown(_load_eval_summary())
-
+            gr.Markdown(_load_eval_summary())
             with gr.Row():
                 with gr.Column():
                     if Path("figures/fig1_coverage.png").exists():
@@ -202,7 +187,6 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
                     if Path("figures/fig4_loop_efficiency.png").exists():
                         gr.Image("figures/fig4_loop_efficiency.png", label="Loop efficiency & router accuracy")
 
-        # ── Tab 3: About ───────────────────────────────────────────────────
         with gr.Tab("About"):
             gr.Markdown("""
 ## System Overview
@@ -216,22 +200,14 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
 | Graph | Neo4j Cypher traversal | Relational / authorship queries |
 | Community | Leiden cluster embeddings | Thematic / trend queries |
 
-### Agentic Loop
-1. Router classifies query → dispatches to best mode
-2. `grade_context` issues binary pass/fail on retrieved context
-3. On fail: `rewrite_query` reformulates for the next mode, loop repeats (max 3)
-4. On pass: `generator` produces answer, `grade_answer` checks groundedness
-5. If all modes fail: structured refusal returned
-
 ### Key Finding
 Adding a correction loop **without** query rewriting (v3) gives no coverage gain (27.5%).
-Adding **mode-aware rewriting** (v4) recovers coverage to 81.2% — rewriting is the critical mechanism.
+Adding **mode-aware rewriting** (v4) recovers coverage to 81.2%.
 
 ### Links
 - [GitHub](https://github.com/VinaySampath14/agentic-graph-rag)
-- [arXiv paper](https://arxiv.org/) *(coming soon)*
 """)
 
 
 if __name__ == "__main__":
-    demo.launch(share=False, theme=gr.themes.Soft())
+    demo.launch(theme=gr.themes.Soft())
