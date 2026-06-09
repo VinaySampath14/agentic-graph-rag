@@ -80,11 +80,30 @@ OOD_SIGNALS = [
     "stock", "price", "news", "politics", "movie", "music",
 ]
 
+GREETING_SIGNALS = [
+    "how are you", "how are u", "hello", "hi there", "hey there",
+    "good morning", "good evening", "good afternoon", "what's up",
+    "whats up", "sup ", "how do you do", "nice to meet",
+]
+
 
 def node_query_analyser(state: AgentState) -> AgentState:
     query = state["query"]
     query_lower = query.lower()
     trace = list(state.get("agent_trace", []))
+
+    # Greeting check
+    for signal in GREETING_SIGNALS:
+        if signal in query_lower:
+            trace.append(_trace_entry(
+                "query_analyser", "refused", "Greeting detected — not a research query",
+            ))
+            return {
+                **state,
+                "refused": True,
+                "refusal_reason": "Hi! I'm a research assistant for CS/AI papers. Ask me about methods, authors, trends, or specific papers.",
+                "agent_trace": trace,
+            }
 
     # Out-of-domain check
     for signal in OOD_SIGNALS:
