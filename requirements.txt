@@ -1,0 +1,14 @@
+neo4j>=5.20
+qdrant-client>=1.9
+langgraph>=0.2
+langchain-groq>=0.1
+fastembed>=0.3
+FlagEmbedding>=1.2
+sentence-transformers>=3.0
+tavily-python>=0.3
+pydantic>=2.7
+python-dotenv>=1.0
+spacy>=3.7
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
+networkx>=3.3
+numpy>=1.26
