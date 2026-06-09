@@ -122,13 +122,13 @@ flowchart TD
     classDef retr fill:#E4F5E1,stroke:#333;
     classDef grade fill:#FFE8B8,stroke:#333;
     classDef refusal fill:#FFD6D6,stroke:#333;
-    classDef end fill:#D9D9D9,stroke:#333;
+    classDef endNode fill:#D9D9D9,stroke:#333;
 
     class QA,RT,RW,GEN proc;
     class NR,GR,CR,WEB retr;
     class GC,GA grade;
     class FR refusal;
-    class END1,END2,END3 end;
+    class END1,END2,END3 endNode;
 ```
 
 | Retrieval mode | Backend | Best for |
