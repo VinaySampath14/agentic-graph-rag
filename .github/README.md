@@ -1,13 +1,12 @@
 # Agentic Graph RAG: Self-Correcting Retrieval over Scientific Literature
 
-[![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b.svg)](https://arxiv.org)
 [![HF Space](https://img.shields.io/badge/🤗%20HuggingFace-Space-yellow)](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph, and community retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
 
-**[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Paper]](https://arxiv.org) · [[Architecture]](ARCHITECTURE.md)**
+**[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Architecture]](../ARCHITECTURE.md)**
 
 ---
 
@@ -56,7 +55,55 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-![Agent Graph](https://raw.githubusercontent.com/VinaySampath14/agentic-graph-rag/main/figures/architecture.png)
+```mermaid
+flowchart TD
+
+    QA["query_analyser"]
+    RT["router"]
+
+    subgraph Retrieval
+        direction LR
+        NR["naive_retr."]
+        GR["graph_retr."]
+        CR["comm_retr."]
+    end
+
+    GC["grade_context"]
+    RW["rewrite_query"]
+    WEB["web_retr."]
+    GEN["generator"]
+    FR["force_refusal"]
+    GA["grade_answer"]
+
+    END1((END))
+    END2((END))
+    END3((END))
+
+    QA --> RT
+
+    RT --> NR
+    RT --> GR
+    RT --> CR
+
+    NR --> GC
+    GR --> GC
+    CR --> GC
+
+    GC -->|pass| GEN
+    GEN --> GA
+    GA --> END1
+
+    GC -.->|loop=3| WEB
+    WEB --> GC
+
+    GC -.->|fail| RW
+    RW -.->|rewrite| RT
+
+    GC -.->|exhausted| FR
+    FR --> END2
+
+    QA -.->|OOD| END3
+```
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
@@ -87,7 +134,7 @@ Run tests:
 pytest tests/unit/ -v         # 44 unit tests, no credentials needed
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for a full walkthrough of the codebase and [CONTRIBUTING.md](CONTRIBUTING.md) for setup details.
+See [ARCHITECTURE.md](../ARCHITECTURE.md) for a full walkthrough of the codebase and [CONTRIBUTING.md](../CONTRIBUTING.md) for setup details.
 
 ---
 
