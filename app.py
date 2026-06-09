@@ -18,11 +18,12 @@ for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD", "TAV
         _os.environ[_k] = _os.environ[_k].strip().replace("\\n", "").replace("\r", "")
 
 EXAMPLE_QUERIES = [
-    "What is Retrieval-Augmented Generation?",
-    "Which papers use Chain-of-Thought reasoning?",
-    "What are the main trends in LLM safety research?",
-    "How do attention mechanisms work in transformers?",
     "What methods are used for parameter-efficient fine-tuning?",
+    "Which institution has the most papers on multimodal learning?",
+    "Which papers cite the attention mechanism paper and were published in 2026?",
+    "What are the main trends in LLM safety research?",
+    "What does the original Word2Vec paper propose?",
+    "What method does the paper on MELD propose for speech language modeling?",
 ]
 
 EVAL_DIR = Path("data/eval")
