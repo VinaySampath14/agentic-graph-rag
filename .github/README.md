@@ -55,55 +55,7 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-```mermaid
-flowchart TD
-
-    QA["query_analyser"]
-    RT["router"]
-
-    subgraph Retrieval
-        direction LR
-        NR["naive_retr."]
-        GR["graph_retr."]
-        CR["comm_retr."]
-    end
-
-    GC["grade_context"]
-    RW["rewrite_query"]
-    WEB["web_retr."]
-    GEN["generator"]
-    FR["force_refusal"]
-    GA["grade_answer"]
-
-    END1((END))
-    END2((END))
-    END3((END))
-
-    QA --> RT
-
-    RT --> NR
-    RT --> GR
-    RT --> CR
-
-    NR --> GC
-    GR --> GC
-    CR --> GC
-
-    GC -->|pass| GEN
-    GEN --> GA
-    GA --> END1
-
-    GC -.->|loop=3| WEB
-    WEB --> GC
-
-    GC -.->|fail| RW
-    RW -.->|rewrite| RT
-
-    GC -.->|exhausted| FR
-    FR --> END2
-
-    QA -.->|OOD| END3
-```
+![Agent Graph](https://raw.githubusercontent.com/VinaySampath14/agentic-graph-rag/main/figures/architecture.png)
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
