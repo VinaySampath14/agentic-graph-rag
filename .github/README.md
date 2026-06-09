@@ -55,7 +55,81 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-![Agent Graph](https://raw.githubusercontent.com/VinaySampath14/agentic-graph-rag/main/figures/architecture_v2.png)
+```mermaid
+flowchart TD
+
+    QA["query_analyser"]
+    RT["router"]
+
+    subgraph RET[" "]
+        direction LR
+        NR["naive_retr."]
+        GR["graph_retr."]
+        CR["comm_retr."]
+    end
+
+    subgraph MID[" "]
+        direction LR
+        RW["rewrite_query"]
+        GC["grade_context"]
+        WEB["web_retr."]
+    end
+
+    GEN["generator"]
+
+    subgraph BOT[" "]
+        direction LR
+        FR["force_refusal"]
+        GA["grade_answer"]
+    end
+
+    END1((END))
+    END2((END))
+    END3((END))
+
+    %% Main flow
+    QA --> RT
+
+    RT --> NR
+    RT --> GR
+    RT --> CR
+
+    NR --> GC
+    GR --> GC
+    CR --> GC
+
+    GC -->|pass| GEN
+    GEN --> GA
+    GA --> END1
+
+    %% Web loop
+    GC -.->|loop=3| WEB
+    WEB --> GC
+
+    %% Rewrite path
+    GC -.->|fail| RW
+    RW -.->|rewrite| RT
+
+    %% Refusal path
+    GC -.->|exhausted| FR
+    FR --> END2
+
+    %% OOD
+    QA -.->|OOD| END3
+
+    %% Colors
+    classDef proc fill:#DCEEFF,stroke:#333;
+    classDef retr fill:#E4F5E1,stroke:#333;
+    classDef grade fill:#FFE8B8,stroke:#333;
+    classDef refusal fill:#FFD6D6,stroke:#333;
+    classDef end fill:#D9D9D9,stroke:#333;
+
+    class QA,RT,RW,GEN proc;
+    class NR,GR,CR,WEB retr;
+    class GC,GA grade;
+    class FR refusal;
+    class END1,END2,END3 end;
+```
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
