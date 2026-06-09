@@ -57,78 +57,37 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ```mermaid
 flowchart TD
+    QA[query_analyser] --> RT[router]
+    QA -.->|OOD| E3((END))
 
-    QA["query_analyser"]
-    RT["router"]
+    RT --> NR[naive_retr.]
+    RT --> GR[graph_retr.]
+    RT --> CR[comm_retr.]
 
-    subgraph RET[" "]
-        direction LR
-        NR["naive_retr."]
-        GR["graph_retr."]
-        CR["comm_retr."]
-    end
+    NR & GR & CR --> GC[grade_context]
 
-    subgraph MID[" "]
-        direction LR
-        RW["rewrite_query"]
-        GC["grade_context"]
-        WEB["web_retr."]
-    end
+    GC -->|pass| GEN[generator]
+    GC -.->|fail| RW[rewrite_query]
+    GC -.->|loop=3| WEB[web_retr.]
+    GC -.->|exhausted| FR[force_refusal]
 
-    GEN["generator"]
-
-    subgraph BOT[" "]
-        direction LR
-        FR["force_refusal"]
-        GA["grade_answer"]
-    end
-
-    END1((END))
-    END2((END))
-    END3((END))
-
-    %% Main flow
-    QA --> RT
-
-    RT --> NR
-    RT --> GR
-    RT --> CR
-
-    NR --> GC
-    GR --> GC
-    CR --> GC
-
-    GC -->|pass| GEN
-    GEN --> GA
-    GA --> END1
-
-    %% Web loop
-    GC -.->|loop=3| WEB
+    RW -.->|rewrite| RT
     WEB --> GC
 
-    %% Rewrite path
-    GC -.->|fail| RW
-    RW -.->|rewrite| RT
+    GEN --> GA[grade_answer] --> E1((END))
+    FR --> E2((END))
 
-    %% Refusal path
-    GC -.->|exhausted| FR
-    FR --> END2
+    classDef blue fill:#DCEEFF,stroke:#4a90d9,color:#000;
+    classDef green fill:#E4F5E1,stroke:#5aab47,color:#000;
+    classDef orange fill:#FFE8B8,stroke:#e0a030,color:#000;
+    classDef red fill:#FFD6D6,stroke:#d95555,color:#000;
+    classDef gray fill:#D9D9D9,stroke:#888,color:#000;
 
-    %% OOD
-    QA -.->|OOD| END3
-
-    %% Colors
-    classDef proc fill:#DCEEFF,stroke:#333;
-    classDef retr fill:#E4F5E1,stroke:#333;
-    classDef grade fill:#FFE8B8,stroke:#333;
-    classDef refusal fill:#FFD6D6,stroke:#333;
-    classDef endNode fill:#D9D9D9,stroke:#333;
-
-    class QA,RT,RW,GEN proc;
-    class NR,GR,CR,WEB retr;
-    class GC,GA grade;
-    class FR refusal;
-    class END1,END2,END3 endNode;
+    class QA,RT,RW,GEN blue;
+    class NR,GR,CR,WEB green;
+    class GC,GA orange;
+    class FR red;
+    class E1,E2,E3 gray;
 ```
 
 | Retrieval mode | Backend | Best for |
