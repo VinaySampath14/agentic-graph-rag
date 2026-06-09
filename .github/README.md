@@ -55,7 +55,7 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-![Agent Graph](https://raw.githubusercontent.com/VinaySampath14/agentic-graph-rag/main/figures/architecture.png)
+![Agent Graph](https://raw.githubusercontent.com/VinaySampath14/agentic-graph-rag/main/figures/architecture_v2.png)
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
