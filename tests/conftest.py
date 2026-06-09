@@ -16,6 +16,7 @@ _STUBS = [
     "groq",
     "spacy",
     "tavily",
+    "ddgs",
     "langchain_community",
     "langchain_community.tools",
     "langchain_community.tools.tavily_search",
