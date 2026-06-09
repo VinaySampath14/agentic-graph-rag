@@ -27,7 +27,7 @@ _groq_client: Groq | None = None
 def _get_groq() -> Groq:
     global _groq_client
     if _groq_client is None:
-        _groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])
+        _groq_client = Groq(api_key=os.environ["GROQ_API_KEY"].strip())
     return _groq_client
 
 

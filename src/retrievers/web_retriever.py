@@ -1,31 +1,19 @@
-"""Web retriever — Tavily search fallback."""
-import os
+"""Web retriever — DuckDuckGo search fallback (no API key required)."""
+import logging
 
-from dotenv import load_dotenv
-from tavily import TavilyClient
+from ddgs import DDGS
 
 from src.retrievers.models import RetrievalResult
 
-load_dotenv()
-
 TOP_K = 5
-_client: TavilyClient | None = None
-
-
-def _get_client() -> TavilyClient:
-    global _client
-    if _client is None:
-        _client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
-    return _client
 
 
 def retrieve(query: str) -> RetrievalResult:
-    client = _get_client()
-
     try:
-        response = client.search(query, max_results=TOP_K, timeout=10)
-        results = response.get("results", [])
+        with DDGS() as ddgs:
+            results = list(ddgs.text(query, max_results=TOP_K))
     except Exception as e:
+        logging.warning("Web retriever error: %s", e)
         return RetrievalResult(
             context_text=f"Web search unavailable: {e}",
             source_type="web",
@@ -42,10 +30,10 @@ def retrieve(query: str) -> RetrievalResult:
     for r in results:
         context_parts.append(
             f"Title: {r.get('title', '')}\n"
-            f"URL: {r.get('url', '')}\n"
-            f"Content: {r.get('content', '')}"
+            f"URL: {r.get('href', '')}\n"
+            f"Content: {r.get('body', '')}"
         )
-        metadata.append({"title": r.get("title"), "url": r.get("url")})
+        metadata.append({"title": r.get("title"), "url": r.get("href")})
 
     return RetrievalResult(
         context_text="\n\n---\n\n".join(context_parts),

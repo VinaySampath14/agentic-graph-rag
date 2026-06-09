@@ -12,6 +12,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import os as _os
+for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD", "TAVILY_API_KEY"):
+    if _k in _os.environ:
+        _os.environ[_k] = _os.environ[_k].strip().replace("\\n", "").replace("\r", "")
+
 EXAMPLE_QUERIES = [
     "What is Retrieval-Augmented Generation?",
     "Which papers use Chain-of-Thought reasoning?",

@@ -1,15 +1,3 @@
----
-title: Agentic Graph RAG
-emoji: 🔍
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-sdk_version: "5.9.1"
-app_file: app.py
-pinned: false
-python_version: "3.11"
----
-
 # Agentic Graph RAG: Self-Correcting Retrieval over Scientific Literature
 
 [![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b.svg)](https://arxiv.org)
