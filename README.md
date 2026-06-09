@@ -68,15 +68,7 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-```
-query_analyser → router → [ vector | graph | community ] → grade_context
-                    ↑                                            │ fail
-               rewrite_query ←──────────────────────────────────┘
-                                                                 │ pass
-                                                            generator → grade_answer → END
-                                                      (loop≥3) web_retriever
-                                                      (exhausted) force_refusal → END
-```
+![Agent Graph](figures/architecture.png)
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
