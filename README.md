@@ -12,14 +12,13 @@ python_version: "3.11"
 
 # Agentic Graph RAG: Self-Correcting Retrieval over Scientific Literature
 
-[![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b.svg)](https://arxiv.org)
 [![HF Space](https://img.shields.io/badge/🤗%20HuggingFace-Space-yellow)](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph, and community retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
 
-**[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Paper]](https://arxiv.org) · [[Architecture]](ARCHITECTURE.md)**
+**[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Architecture]](ARCHITECTURE.md)**
 
 ---
 
