@@ -29,14 +29,17 @@ async def lifespan(app: FastAPI):
     # Pre-warm all models and connections at startup so the first request
     # doesn't pay model-load time (BGE-M3 + SPLADE can take 20-30s on CPU)
     print("Pre-warming models and connections...")
-    from src.agent.connections import get_dense_model, get_neo4j_driver, get_qdrant_client
+    from src.agent.connections import (
+        get_dense_model, get_neo4j_driver, get_qdrant_client, get_ontology_graph,
+    )
     from src.retrievers.naive_retriever import _get_sparse_model, _get_cross_encoder
     from src.agent.nodes import _get_groq
-    get_dense_model()      # shared BGE-M3 — used by both naive and community retrievers
+    get_dense_model()       # shared BGE-M3
     _get_sparse_model()
     _get_cross_encoder()
     get_neo4j_driver()
     get_qdrant_client()
+    get_ontology_graph()    # RDFLib in-memory graph (130k triples)
     _get_groq()
     get_graph()
     print("Pre-warm complete.")

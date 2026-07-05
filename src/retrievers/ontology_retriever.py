@@ -11,8 +11,7 @@ from src.retrievers.models import RetrievalResult
 
 load_dotenv()
 
-ONTOLOGY_FILE = Path("ontology/arxiv_cs_populated.ttl")
-PROMPTS_DIR   = Path("prompts")
+PROMPTS_DIR = Path("prompts")
 
 SCHEMA_SUMMARY = """
 Classes:
@@ -49,18 +48,12 @@ SELECT ?label ?type WHERE {
 } LIMIT 10
 """
 
-_graph: Graph | None = None
-_groq:  Groq   | None = None
+_groq: Groq | None = None
 
 
 def get_graph() -> Graph:
-    global _graph
-    if _graph is None:
-        print("Loading ontology graph...")
-        _graph = Graph()
-        _graph.parse(ONTOLOGY_FILE, format="turtle")
-        print(f"Ontology loaded: {len(_graph)} triples")
-    return _graph
+    from src.agent.connections import get_ontology_graph
+    return get_ontology_graph()
 
 
 def get_groq() -> Groq:
