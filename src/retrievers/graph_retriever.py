@@ -1,10 +1,17 @@
-"""Local graph retriever — Neo4j Cypher traversal with fuzzy entity linking."""
+"""Local graph retriever — Neo4j Cypher traversal with fuzzy entity linking.
+
+Ontology expansion: when a query mentions a method category (e.g. "fine-tuning
+methods", "alignment techniques"), the OWL ontology is queried for all members
+of that subclass. The expanded method list is then passed into Neo4j so category-
+level queries surface the correct papers and authors without hardcoding method names.
+"""
 import os
 import re
 
 import spacy
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from rdflib import RDF, RDFS, Namespace
 
 from src.retrievers.models import RetrievalResult
 
@@ -12,6 +19,22 @@ load_dotenv()
 
 _nlp = None
 _driver = None
+
+EX = Namespace("http://arxiv-cs.org/ontology#")
+
+# Maps query keywords → ontology subclass URI
+CATEGORY_SIGNALS = {
+    "fine-tuning":   EX.FineTuningMethod,
+    "fine tuning":   EX.FineTuningMethod,
+    "finetuning":    EX.FineTuningMethod,
+    "alignment":     EX.AlignmentMethod,
+    "attention":     EX.AttentionMethod,
+    "transformer":   EX.AttentionMethod,
+    "reasoning":     EX.ReasoningMethod,
+    "agent":         EX.ReasoningMethod,
+    "retrieval":     EX.RetrievalMethod,
+    "search":        EX.RetrievalMethod,
+}
 
 TEMPORAL_PATTERNS = [
     (r"after (\d{4})", "after"),
@@ -46,6 +69,54 @@ def _get_driver():
                 auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
             )
     return _driver
+
+
+def _expand_with_ontology(query: str) -> list[str]:
+    """Return method names from the ontology if query mentions a category keyword."""
+    query_lower = query.lower()
+    matched_subclasses = set()
+
+    for keyword, subclass_uri in CATEGORY_SIGNALS.items():
+        if keyword in query_lower:
+            matched_subclasses.add(subclass_uri)
+
+    if not matched_subclasses:
+        return []
+
+    try:
+        from src.agent.connections import get_ontology_graph
+        g = get_ontology_graph()
+        methods = []
+        for subclass_uri in matched_subclasses:
+            for s, _, _ in g.triples((None, RDF.type, subclass_uri)):
+                label = g.value(s, RDFS.label)
+                if label:
+                    methods.append(str(label))
+        return list(dict.fromkeys(methods))  # deduplicate, preserve order
+    except Exception:
+        return []
+
+
+def _traverse_from_method(
+    method_name: str,
+    temporal_filter: tuple,
+    session,
+) -> tuple[list[dict], str]:
+    """Find papers and authors for a given method name via Neo4j."""
+    filter_type, year = temporal_filter
+    time_clause = f"AND p.year >= {year}" if filter_type == "after" and year else ""
+
+    cypher = f"""
+        MATCH (m:Method {{name: $name}})<-[:USES_METHOD]-(p:Paper)-[:AUTHORED_BY]->(a:Author)
+        WHERE 1=1 {time_clause}
+        RETURN DISTINCT p.arxiv_id AS arxiv_id, p.title AS title,
+               p.year AS year, p.venue AS venue,
+               collect(DISTINCT a.name)[..3] AS authors
+        ORDER BY p.year DESC
+        LIMIT 10
+    """
+    result = session.run(cypher, name=method_name)
+    return result.data(), cypher.strip()
 
 
 def _extract_entities(query: str) -> list[str]:
@@ -175,6 +246,8 @@ def _serialise_results(results: list[dict], entity: str) -> str:
             line += f" — shared authors: {', '.join(r['shared_authors'])}"
         if r.get("shared_methods"):
             line += f" — shared methods: {', '.join(r['shared_methods'])}"
+        if r.get("authors"):
+            line += f" — authors: {', '.join(r['authors'])}"
         lines.append(line)
     return "\n".join(lines)
 
@@ -184,50 +257,66 @@ def retrieve(query: str) -> RetrievalResult:
     temporal_filter = _detect_temporal_filter(query)
     venue_filter = _detect_venue_filter(query)
 
-    if not entities:
-        return RetrievalResult(
-            context_text="No entities found in query for graph traversal.",
-            source_type="graph",
-        )
+    # Ontology expansion — resolve category keywords to specific method names
+    expanded_methods = _expand_with_ontology(query)
 
     driver = _get_driver()
     all_context_parts = []
     cypher_queries_used = []
 
     with driver.session() as session:
-        for entity in entities[:3]:
-            matches = _fuzzy_entity_search(entity, session)
-            if not matches:
-                continue
 
-            for match in matches[:2]:
-                if match.get("type") == "paper":
-                    results, cypher = _traverse_from_paper(
-                        match["arxiv_id"], hops=1,
-                        temporal_filter=temporal_filter,
-                        venue_filter=venue_filter,
-                        session=session,
-                    )
-                    if len(results) < 3:
+        # Run ontology-expanded method queries first
+        for method_name in expanded_methods[:5]:
+            results, cypher = _traverse_from_method(
+                method_name, temporal_filter, session
+            )
+            cypher_queries_used.append(cypher)
+            context = _serialise_results(results, method_name)
+            if context:
+                all_context_parts.append(context)
+
+        # Fall back to standard entity extraction if no expansion or no results
+        if not all_context_parts:
+            if not entities:
+                return RetrievalResult(
+                    context_text="No entities found in query for graph traversal.",
+                    source_type="graph",
+                )
+
+            for entity in entities[:3]:
+                matches = _fuzzy_entity_search(entity, session)
+                if not matches:
+                    continue
+
+                for match in matches[:2]:
+                    if match.get("type") == "paper":
                         results, cypher = _traverse_from_paper(
-                            match["arxiv_id"], hops=2,
+                            match["arxiv_id"], hops=1,
                             temporal_filter=temporal_filter,
                             venue_filter=venue_filter,
                             session=session,
                         )
-                    cypher_queries_used.append(cypher)
-                    context = _serialise_results(results, entity)
-                    if context:
-                        all_context_parts.append(context)
+                        if len(results) < 3:
+                            results, cypher = _traverse_from_paper(
+                                match["arxiv_id"], hops=2,
+                                temporal_filter=temporal_filter,
+                                venue_filter=venue_filter,
+                                session=session,
+                            )
+                        cypher_queries_used.append(cypher)
+                        context = _serialise_results(results, entity)
+                        if context:
+                            all_context_parts.append(context)
 
-                elif match.get("type") == "author":
-                    results, cypher = _traverse_from_author(
-                        match["name"], temporal_filter, session
-                    )
-                    cypher_queries_used.append(cypher)
-                    context = _serialise_results(results, match["name"])
-                    if context:
-                        all_context_parts.append(context)
+                    elif match.get("type") == "author":
+                        results, cypher = _traverse_from_author(
+                            match["name"], temporal_filter, session
+                        )
+                        cypher_queries_used.append(cypher)
+                        context = _serialise_results(results, match["name"])
+                        if context:
+                            all_context_parts.append(context)
 
     if not all_context_parts:
         return RetrievalResult(
@@ -242,6 +331,7 @@ def retrieve(query: str) -> RetrievalResult:
         cypher_query_used="\n---\n".join(cypher_queries_used[:2]),
         source_metadata={
             "entities_found": entities,
+            "expanded_methods": expanded_methods,
             "temporal_filter": temporal_filter,
             "venue_filter": venue_filter,
         },
