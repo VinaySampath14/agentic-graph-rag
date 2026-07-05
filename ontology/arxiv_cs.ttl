@@ -1,0 +1,171 @@
+@prefix ex:   <http://arxiv-cs.org/ontology#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
+
+# ── Ontology metadata ─────────────────────────────────────────────────────────
+
+<http://arxiv-cs.org/ontology>
+    a owl:Ontology ;
+    dc:title "ArXiv CS Research Ontology" ;
+    dc:description "OWL ontology for 2,000 arXiv CS.AI + CS.CL papers (2026). Covers papers, authors, institutions, and research methods with a 5-category method subclass hierarchy." ;
+    owl:versionInfo "1.0" .
+
+
+# ── Top-level classes ─────────────────────────────────────────────────────────
+
+ex:Paper
+    a owl:Class ;
+    rdfs:label "Paper" ;
+    rdfs:comment "An arXiv research paper in CS.AI or CS.CL." .
+
+ex:Author
+    a owl:Class ;
+    rdfs:label "Author" ;
+    rdfs:comment "A person who authored one or more papers in the corpus." .
+
+ex:Institution
+    a owl:Class ;
+    rdfs:label "Institution" ;
+    rdfs:comment "A research institution or organisation affiliated with one or more authors." .
+
+ex:Method
+    a owl:Class ;
+    rdfs:label "Method" ;
+    rdfs:comment "An AI/ML method, technique, architecture, or algorithm mentioned in the corpus." .
+
+ex:Community
+    a owl:Class ;
+    rdfs:label "Community" ;
+    rdfs:comment "A research community detected via Leiden algorithm over the co-authorship and method co-occurrence graph." .
+
+
+# ── Method subclass hierarchy (new — not present in Neo4j) ───────────────────
+
+ex:FineTuningMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Fine-Tuning Method" ;
+    rdfs:comment "Methods for adapting pretrained models to specific tasks or domains. Includes parameter-efficient techniques (LoRA, QLoRA, PEFT), instruction tuning, and prefix tuning." .
+
+ex:AttentionMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Attention Method" ;
+    rdfs:comment "Architectures and mechanisms based on attention, including Transformer variants, sparse attention, flash attention, and mixture-of-experts routing." .
+
+ex:AlignmentMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Alignment Method" ;
+    rdfs:comment "Methods for aligning language model behaviour with human preferences or safety constraints. Includes RLHF, DPO, PPO, RLAIF, and constitutional AI approaches." .
+
+ex:ReasoningMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Reasoning Method" ;
+    rdfs:comment "Methods that augment LLM reasoning or agentic behaviour. Includes chain-of-thought prompting, retrieval-augmented generation, tool use, and multi-agent frameworks." .
+
+ex:RetrievalMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Retrieval Method" ;
+    rdfs:comment "Methods for information retrieval and vector search. Includes dense retrievers (DPR, ColBERT), sparse retrievers (BM25), and vector databases (FAISS, Qdrant)." .
+
+
+# ── Object properties ─────────────────────────────────────────────────────────
+
+ex:authoredBy
+    a owl:ObjectProperty ;
+    rdfs:label "authored by" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  ex:Author ;
+    rdfs:comment "Relates a paper to one of its authors." .
+
+ex:usesMethod
+    a owl:ObjectProperty ;
+    rdfs:label "uses method" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  ex:Method ;
+    rdfs:comment "Relates a paper to a method it employs, as extracted from the abstract." .
+
+ex:fromInstitution
+    a owl:ObjectProperty ;
+    rdfs:label "from institution" ;
+    rdfs:domain ex:Author ;
+    rdfs:range  ex:Institution ;
+    rdfs:comment "Relates an author to their affiliated institution." .
+
+ex:belongsToCommunity
+    a owl:ObjectProperty ;
+    rdfs:label "belongs to community" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  ex:Community ;
+    rdfs:comment "Relates a paper to the Leiden-detected research community it was assigned to." .
+
+ex:relatedWork
+    a owl:ObjectProperty ,
+      owl:SymmetricProperty ;
+    rdfs:label "related work" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  ex:Paper ;
+    rdfs:comment "Inferred relationship between papers that share at least one method subclass. Not stored in Neo4j — derived by the OWL reasoner." .
+
+
+# ── Datatype properties ───────────────────────────────────────────────────────
+
+ex:arxivId
+    a owl:DatatypeProperty ;
+    rdfs:label "arXiv ID" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  xsd:string .
+
+ex:title
+    a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  xsd:string .
+
+ex:year
+    a owl:DatatypeProperty ;
+    rdfs:label "year" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  xsd:integer .
+
+ex:venue
+    a owl:DatatypeProperty ;
+    rdfs:label "venue" ;
+    rdfs:domain ex:Paper ;
+    rdfs:range  xsd:string .
+
+ex:authorName
+    a owl:DatatypeProperty ;
+    rdfs:label "author name" ;
+    rdfs:domain ex:Author ;
+    rdfs:range  xsd:string .
+
+ex:institutionName
+    a owl:DatatypeProperty ;
+    rdfs:label "institution name" ;
+    rdfs:domain ex:Institution ;
+    rdfs:range  xsd:string .
+
+ex:methodName
+    a owl:DatatypeProperty ;
+    rdfs:label "method name" ;
+    rdfs:domain ex:Method ;
+    rdfs:range  xsd:string .
+
+ex:communityTheme
+    a owl:DatatypeProperty ;
+    rdfs:label "community theme" ;
+    rdfs:domain ex:Community ;
+    rdfs:range  xsd:string .
+
+ex:communitySize
+    a owl:DatatypeProperty ;
+    rdfs:label "community size" ;
+    rdfs:domain ex:Community ;
+    rdfs:range  xsd:integer .

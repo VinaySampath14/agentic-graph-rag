@@ -1,0 +1,674 @@
+{
+  "Transformer": {
+    "method": "Transformer",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "Transformer is a type of attention-based architecture.",
+    "needs_review": false
+  },
+  "Attention": {
+    "method": "Attention",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "The method 'Attention' directly corresponds to attention-based architectures.",
+    "needs_review": false
+  },
+  "Multi-head Attention": {
+    "method": "Multi-head Attention",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "Multi-head Attention is a type of attention-based architecture, which is a direct characteristic of the AttentionMethod subclass.",
+    "needs_review": false
+  },
+  "Flash Attention": {
+    "method": "Flash Attention",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "FlashAttention is an attention-based architecture, which is a specific type of neural network mechanism.",
+    "needs_review": false
+  },
+  "Sparse Attention": {
+    "method": "Sparse Attention",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "Sparse attention is a type of attention mechanism used in attention-based architectures.",
+    "needs_review": false
+  },
+  "Cross-Attention": {
+    "method": "Cross-Attention",
+    "subclass": "AttentionMethod",
+    "confidence": 0.9,
+    "reason": "Cross-Attention is a type of attention mechanism, which is a fundamental component of attention-based architectures.",
+    "needs_review": false
+  },
+  "MoE": {
+    "method": "MoE",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "MoE (Mixture of Experts) is an attention-based architecture that routes inputs to different expert models based on their strengths.",
+    "needs_review": false
+  },
+  "Mixture of Experts": {
+    "method": "Mixture of Experts",
+    "subclass": "AttentionMethod",
+    "confidence": 0.8,
+    "reason": "Mixture of Experts is an attention-based architecture where multiple expert models are used to improve performance.",
+    "needs_review": false
+  },
+  "SSM": {
+    "method": "SSM",
+    "subclass": "AttentionMethod",
+    "confidence": 1.0,
+    "reason": "SSM is mentioned alongside other attention-based architectures like Transformer and MoE in the AttentionMethod subclass.",
+    "needs_review": false
+  },
+  "State Space Model": {
+    "method": "State Space Model",
+    "subclass": "AttentionMethod",
+    "confidence": 0.8,
+    "reason": "State Space Model (SSM) is closely related to attention-based architectures, particularly in the context of sequence modeling and transformer-based models.",
+    "needs_review": false
+  },
+  "LoRA": {
+    "method": "LoRA",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "LoRA is a technique for adapting pretrained models, which falls under the FineTuningMethod subclass.",
+    "needs_review": false
+  },
+  "QLoRA": {
+    "method": "QLoRA",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "QLoRA is a method for adapting pretrained models, which falls under the FineTuningMethod subclass.",
+    "needs_review": false
+  },
+  "AdaLoRA": {
+    "method": "AdaLoRA",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "AdaLoRA is an adaptation of LoRA, which is a fine-tuning method for pretrained models.",
+    "needs_review": false
+  },
+  "DoRA": {
+    "method": "DoRA",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "DoRA is an adapter-based method, which is a type of fine-tuning approach for pretrained models.",
+    "needs_review": false
+  },
+  "LoRAX": {
+    "method": "LoRAX",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "LoRAX is an extension of LoRA, which is a fine-tuning method for adapting pre-trained models.",
+    "needs_review": false
+  },
+  "RLHF": {
+    "method": "RLHF",
+    "subclass": "AlignmentMethod",
+    "confidence": 1.0,
+    "reason": "RLHF (Reinforcement Learning from Human Feedback) is a method used to align models with human preferences.",
+    "needs_review": false
+  },
+  "PPO": {
+    "method": "PPO",
+    "subclass": "AlignmentMethod",
+    "confidence": 0.9,
+    "reason": "PPO is listed as an example of an AlignmentMethod, which aligns models with human preferences.",
+    "needs_review": false
+  },
+  "DPO": {
+    "method": "DPO",
+    "subclass": "AlignmentMethod",
+    "confidence": 1.0,
+    "reason": "DPO is a method for aligning models with human preferences, which falls under the AlignmentMethod subclass.",
+    "needs_review": false
+  },
+  "GRPO": {
+    "method": "GRPO",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "GRPO is an optimization algorithm, which is typically used for fine-tuning pre-trained models.",
+    "needs_review": false
+  },
+  "RLAIF": {
+    "method": "RLAIF",
+    "subclass": "AlignmentMethod",
+    "confidence": 1.0,
+    "reason": "RLAIF is listed as an example of an AlignmentMethod, which involves aligning models with human preferences.",
+    "needs_review": false
+  },
+  "Instruction Tuning": {
+    "method": "Instruction Tuning",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "Instruction Tuning is a technique used to adapt pretrained models by fine-tuning them on specific instructions or tasks.",
+    "needs_review": false
+  },
+  "FLAN": {
+    "method": "FLAN",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "FLAN is a fine-tuning method that adapts a pre-trained model to align with specific tasks or instructions.",
+    "needs_review": false
+  },
+  "Alpaca": {
+    "method": "Alpaca",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Alpaca is a fine-tuning method that adapts a pre-trained language model to a specific task.",
+    "needs_review": false
+  },
+  "Vicuna": {
+    "method": "Vicuna",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Vicuna is an instruction-tuned model, which is a type of fine-tuning method.",
+    "needs_review": false
+  },
+  "Prefix Tuning": {
+    "method": "Prefix Tuning",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "Prefix Tuning is a technique for adapting pretrained models, which aligns with the scope of FineTuningMethod.",
+    "needs_review": false
+  },
+  "Prompt Tuning": {
+    "method": "Prompt Tuning",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "Prompt Tuning is a technique that adapts pretrained models by adjusting the prompts or input embeddings to better fit specific tasks.",
+    "needs_review": false
+  },
+  "P-Tuning": {
+    "method": "P-Tuning",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "P-Tuning is a method for adapting pretrained models, specifically by tuning prompt embeddings.",
+    "needs_review": false
+  },
+  "Chain-of-Thought": {
+    "method": "Chain-of-Thought",
+    "subclass": "ReasoningMethod",
+    "confidence": 1.0,
+    "reason": "Chain-of-Thought is a method that involves generating a series of intermediate reasoning steps to produce a final answer, which aligns with augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "CoT": {
+    "method": "CoT",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "CoT stands for Chain-of-Thought, which is a method for augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "Tree of Thoughts": {
+    "method": "Tree of Thoughts",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "Tree of Thoughts seems to imply a structured approach to generating or exploring ideas, which aligns with augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "ToT": {
+    "method": "ToT",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "ToT likely refers to 'Text-to-Text Transfer Transformer', which is related to augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "ReAct": {
+    "method": "ReAct",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "ReAct is a method that involves augmenting reasoning or agentic behaviour, which aligns with the scope of the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "Reflexion": {
+    "method": "Reflexion",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "Reflexion is related to augmenting reasoning or agentic behaviour, which aligns with the scope of the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "Self-Consistency": {
+    "method": "Self-Consistency",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Self-Consistency is related to adapting and fine-tuning pretrained models to improve their performance and consistency.",
+    "needs_review": false
+  },
+  "RAG": {
+    "method": "RAG",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "RAG is a method that augments reasoning by generating text based on retrieved information, fitting best into the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "GraphRAG": {
+    "method": "GraphRAG",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "GraphRAG is related to Graph Neural Networks and Retrieval-Augmented Generation, which are most closely associated with augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "LightRAG": {
+    "method": "LightRAG",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "LightRAG is an extension of the RAG model, which is known for augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "HippoRAG": {
+    "method": "HippoRAG",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "HippoRAG is related to RAG, which is a reasoning-based method for augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "LangChain": {
+    "method": "LangChain",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "LangChain is a framework for building applications that leverage large language models for reasoning and decision-making.",
+    "needs_review": false
+  },
+  "LangGraph": {
+    "method": "LangGraph",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "LangGraph is related to graph neural networks and augmenting reasoning or agentic behaviour, which fits best with the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "AutoGen": {
+    "method": "AutoGen",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "AutoGen is classified as a ReasoningMethod because it involves augmenting reasoning or agentic behaviour, similar to other methods in this subclass like Chain-of-Thought and RAG.",
+    "needs_review": false
+  },
+  "CrewAI": {
+    "method": "CrewAI",
+    "subclass": "AlignmentMethod",
+    "confidence": 0.8,
+    "reason": "CrewAI is not a well-known method and without specific details, it's assumed to be related to aligning models with human preferences based on the name.",
+    "needs_review": false
+  },
+  "CLIP": {
+    "method": "CLIP",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "CLIP is a method that adapts pretrained models for specific tasks, which aligns with the scope of FineTuningMethod.",
+    "needs_review": false
+  },
+  "DALL-E": {
+    "method": "DALL-E",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "DALL-E is based on a pretrained model that is fine-tuned for specific tasks, such as generating images from text prompts.",
+    "needs_review": false
+  },
+  "DALL-E 2": {
+    "method": "DALL-E 2",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.9,
+    "reason": "DALL-E 2 is based on a pretrained model that is fine-tuned for specific tasks, such as image generation from text prompts.",
+    "needs_review": false
+  },
+  "DALL-E 3": {
+    "method": "DALL-E 3",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "DALL-E 3 is an adaptation of a pretrained model, specifically a text-to-image model that fine-tunes a large language model to generate images.",
+    "needs_review": false
+  },
+  "Stable Diffusion": {
+    "method": "Stable Diffusion",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Stable Diffusion is a type of diffusion model that is often fine-tuned from a pre-trained model for specific tasks.",
+    "needs_review": false
+  },
+  "ViT": {
+    "method": "ViT",
+    "subclass": "AttentionMethod",
+    "confidence": 0.9,
+    "reason": "ViT, or Vision Transformer, is an attention-based architecture.",
+    "needs_review": false
+  },
+  "ResNet": {
+    "method": "ResNet",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "ResNet is a pretrained model that can be fine-tuned for various tasks.",
+    "needs_review": false
+  },
+  "DINO": {
+    "method": "DINO",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "DINO is a method for adapting pretrained models, specifically using self-supervised learning to fine-tune vision transformers.",
+    "needs_review": false
+  },
+  "LLaVA": {
+    "method": "LLaVA",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "LLaVA is an adaptation of the LLaMA model, which suggests it involves fine-tuning a pre-trained model.",
+    "needs_review": false
+  },
+  "Flamingo": {
+    "method": "Flamingo",
+    "subclass": "AttentionMethod",
+    "confidence": 0.9,
+    "reason": "Flamingo is a vision-language model that utilizes attention-based architectures.",
+    "needs_review": false
+  },
+  "BLIP": {
+    "method": "BLIP",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "BLIP is a method that adapts pretrained models for vision-language tasks.",
+    "needs_review": false
+  },
+  "InstructBLIP": {
+    "method": "InstructBLIP",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "InstructBLIP is a fine-tuning method that adapts a pre-trained model to align with human instructions.",
+    "needs_review": false
+  },
+  "GPT-4V": {
+    "method": "GPT-4V",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "GPT-4V is an adaptation of the GPT model, which implies it involves fine-tuning a pre-trained model.",
+    "needs_review": false
+  },
+  "Gemini Vision": {
+    "method": "Gemini Vision",
+    "subclass": "AttentionMethod",
+    "confidence": 0.8,
+    "reason": "Gemini Vision is related to Google's multimodal large language model and vision system, which likely utilizes attention-based architectures.",
+    "needs_review": false
+  },
+  "FAISS": {
+    "method": "FAISS",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "FAISS is a library for efficient similarity search and clustering of dense vectors, which aligns with the scope of RetrievalMethod.",
+    "needs_review": false
+  },
+  "BM25": {
+    "method": "BM25",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "BM25 is a classic information retrieval algorithm used for ranking and searching documents.",
+    "needs_review": false
+  },
+  "DPR": {
+    "method": "DPR",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "DPR (Dense Passage Retriever) is a method primarily used for information retrieval and vector search.",
+    "needs_review": false
+  },
+  "ColBERT": {
+    "method": "ColBERT",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "ColBERT is a neural ranking model designed for information retrieval tasks.",
+    "needs_review": false
+  },
+  "Contriever": {
+    "method": "Contriever",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.9,
+    "reason": "Contriever is a retrieval-based method that focuses on information retrieval and vector search.",
+    "needs_review": false
+  },
+  "Qdrant": {
+    "method": "Qdrant",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "Qdrant is a vector database, which falls under the RetrievalMethod subclass according to the given rules.",
+    "needs_review": false
+  },
+  "Pinecone": {
+    "method": "Pinecone",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "Pinecone is a vector database, which directly falls under the RetrievalMethod subclass according to the given rules.",
+    "needs_review": false
+  },
+  "Weaviate": {
+    "method": "Weaviate",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.9,
+    "reason": "Weaviate is a vector search engine and a vector database, which aligns with the RetrievalMethod subclass.",
+    "needs_review": false
+  },
+  "ChromaDB": {
+    "method": "ChromaDB",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.8,
+    "reason": "ChromaDB is likely a vector database or an information retrieval system, which aligns with the RetrievalMethod subclass.",
+    "needs_review": false
+  },
+  "Milvus": {
+    "method": "Milvus",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "Milvus is a vector database, which falls under the RetrievalMethod subclass.",
+    "needs_review": false
+  },
+  "Adam": {
+    "method": "Adam",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "Adam is a training optimiser, which according to the rules, falls under the FineTuningMethod subclass.",
+    "needs_review": false
+  },
+  "AdamW": {
+    "method": "AdamW",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "AdamW is a training optimizer, which is classified under FineTuningMethod according to the given rules.",
+    "needs_review": false
+  },
+  "SGD": {
+    "method": "SGD",
+    "subclass": "FineTuningMethod",
+    "confidence": 1.0,
+    "reason": "SGD is a training optimizer used for fine-tuning pretrained models.",
+    "needs_review": false
+  },
+  "Lion": {
+    "method": "Lion",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.0,
+    "reason": "Lion does not match any known AI/ML method, so it is classified as FineTuningMethod by default, but with zero confidence.",
+    "needs_review": true
+  },
+  "Dropout": {
+    "method": "Dropout",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Dropout is a regularization technique often used during the training process of pretrained models, which is closely related to fine-tuning methods.",
+    "needs_review": false
+  },
+  "BatchNorm": {
+    "method": "BatchNorm",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "BatchNorm is a technique often used in conjunction with pretrained models and training optimizers to adapt and fine-tune them.",
+    "needs_review": false
+  },
+  "LayerNorm": {
+    "method": "LayerNorm",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "LayerNorm is often used as a component in adapting pretrained models.",
+    "needs_review": false
+  },
+  "RMSNorm": {
+    "method": "RMSNorm",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "RMSNorm is a normalization technique often used in training optimizers, which falls under the FineTuningMethod category.",
+    "needs_review": false
+  },
+  "Gradient Checkpointing": {
+    "method": "Gradient Checkpointing",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "Gradient checkpointing is an optimization technique used during the training process, which is closely related to fine-tuning methods.",
+    "needs_review": false
+  },
+  "DeepSpeed": {
+    "method": "DeepSpeed",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "DeepSpeed is a library that includes optimization techniques such as ZeRO and optimizer state partitioning, which are used for fine-tuning large models.",
+    "needs_review": false
+  },
+  "FSDP": {
+    "method": "FSDP",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "FSDP (Fully Sharded Data Parallel) is a method for adapting and optimizing pretrained models during the fine-tuning process.",
+    "needs_review": false
+  },
+  "ZeRO": {
+    "method": "ZeRO",
+    "subclass": "FineTuningMethod",
+    "confidence": 0.8,
+    "reason": "ZeRO is a memory optimization technique often used in conjunction with fine-tuning of large pre-trained models.",
+    "needs_review": false
+  },
+  "BLEU": {
+    "method": "BLEU",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "BLEU is a benchmark and evaluation metric, which aligns with the ReasoningMethod subclass according to the given rules.",
+    "needs_review": false
+  },
+  "ROUGE": {
+    "method": "ROUGE",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "ROUGE is a benchmark and evaluation metric used to assess the quality of text summarization and generation, which falls under the scope of augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "BERTScore": {
+    "method": "BERTScore",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "BERTScore is a benchmark and evaluation metric used to measure the quality of generated text, which aligns with the scope of ReasoningMethod.",
+    "needs_review": false
+  },
+  "RAGAS": {
+    "method": "RAGAS",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "RAGAS is related to graph neural networks and reasoning, which aligns with the scope of the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "MMLU": {
+    "method": "MMLU",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "MMLU is classified as a benchmark or evaluation metric, which falls under the ReasoningMethod subclass according to the given rules.",
+    "needs_review": false
+  },
+  "HumanEval": {
+    "method": "HumanEval",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "HumanEval is a benchmark for evaluating the reasoning capabilities of programming models.",
+    "needs_review": false
+  },
+  "GSM8K": {
+    "method": "GSM8K",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "GSM8K is a benchmark for mathematical reasoning, which aligns with the scope of augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "MATH": {
+    "method": "MATH",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "MATH is likely related to mathematical reasoning, which aligns with the scope of augmenting reasoning or agentic behaviour.",
+    "needs_review": false
+  },
+  "HellaSwag": {
+    "method": "HellaSwag",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "HellaSwag is a benchmark dataset used for evaluating the reasoning capabilities of language models.",
+    "needs_review": false
+  },
+  "Neo4j": {
+    "method": "Neo4j",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.8,
+    "reason": "Neo4j is a graph database that can be used for information retrieval and vector search, similar to vector databases.",
+    "needs_review": false
+  },
+  "Leiden": {
+    "method": "Leiden",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "Leiden is a graph clustering algorithm, which is related to graph neural networks and thus falls under the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "Louvain": {
+    "method": "Louvain",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.8,
+    "reason": "Louvain is a community detection algorithm that can be related to graph neural networks, which falls under the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "PageRank": {
+    "method": "PageRank",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.9,
+    "reason": "PageRank is a link analysis algorithm used for information retrieval and ranking web pages.",
+    "needs_review": false
+  },
+  "Node2Vec": {
+    "method": "Node2Vec",
+    "subclass": "RetrievalMethod",
+    "confidence": 0.8,
+    "reason": "Node2Vec is a technique for learning vector representations of nodes in a graph, which can be used for information retrieval and vector search.",
+    "needs_review": false
+  },
+  "GraphSAGE": {
+    "method": "GraphSAGE",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "GraphSAGE is a type of graph neural network, which is classified under the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "GAT": {
+    "method": "GAT",
+    "subclass": "ReasoningMethod",
+    "confidence": 0.9,
+    "reason": "GAT is a type of graph neural network, which is classified under the ReasoningMethod subclass.",
+    "needs_review": false
+  },
+  "GCN": {
+    "method": "GCN",
+    "subclass": "ReasoningMethod",
+    "confidence": 1.0,
+    "reason": "GCN is a type of graph neural network, which is classified under the ReasoningMethod subclass according to the given rules.",
+    "needs_review": false
+  },
+  "GNN": {
+    "method": "GNN",
+    "subclass": "ReasoningMethod",
+    "confidence": 1.0,
+    "reason": "Graph neural networks like GNN are classified under ReasoningMethod as per the given rules.",
+    "needs_review": false
+  }
+}
