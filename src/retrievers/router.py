@@ -19,6 +19,13 @@ INTENT_SIGNALS: dict[str, list[str]] = {
         "papers about", "papers on", "research on", "fine-tuning",
         "fine tuning", "training", "evaluation", "performance",
     ],
+    "ontology": [
+        "what types of", "what kinds of", "type of method", "subtype of",
+        "what categories", "which categories", "category of", "categories of",
+        "classify", "belong to", "hierarchy", "subclass of",
+        "implicitly related", "same category", "infer", "structurally related",
+        "what methods exist", "what methods are", "how are", "related to each other",
+    ],
 }
 
 LOW_CONFIDENCE_THRESHOLD = 2
@@ -40,7 +47,7 @@ def classify(query: str, mode_history: list[str] | None = None) -> dict:
         mode_history = []
 
     query_lower = query.lower()
-    scores: dict[str, int] = {"graph": 0, "community": 0, "vector": 0}
+    scores: dict[str, int] = {"graph": 0, "community": 0, "vector": 0, "ontology": 0}
 
     for intent, signals in INTENT_SIGNALS.items():
         for signal in signals:

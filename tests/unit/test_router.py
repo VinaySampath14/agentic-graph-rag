@@ -43,11 +43,11 @@ class TestModeHistoryExclusion:
         assert result["primary_mode"] != "graph"
 
     def test_all_modes_tried_falls_back_to_web(self):
-        result = classify("What is BERT?", mode_history=["vector", "graph", "community"])
+        result = classify("What is BERT?", mode_history=["vector", "graph", "community", "ontology"])
         assert result["primary_mode"] == "web"
 
     def test_web_mode_has_zero_confidence(self):
-        result = classify("Any query", mode_history=["vector", "graph", "community"])
+        result = classify("Any query", mode_history=["vector", "graph", "community", "ontology"])
         assert result["confidence"] == 0
         assert result["low_confidence"] is True
 
@@ -86,7 +86,7 @@ class TestConfidence:
 class TestEdgeCases:
     def test_empty_query_returns_a_mode(self):
         result = classify("")
-        assert result["primary_mode"] in {"graph", "community", "vector", "web"}
+        assert result["primary_mode"] in {"graph", "community", "vector", "ontology", "web"}
 
     def test_case_insensitive(self):
         lower = classify("what is rag?")
@@ -102,8 +102,8 @@ class TestEdgeCases:
 # ── INTENT_SIGNALS sanity ──────────────────────────────────────────────────
 
 class TestIntentSignals:
-    def test_all_three_modes_have_signals(self):
-        assert set(INTENT_SIGNALS.keys()) == {"graph", "community", "vector"}
+    def test_all_four_modes_have_signals(self):
+        assert set(INTENT_SIGNALS.keys()) == {"graph", "community", "vector", "ontology"}
 
     def test_each_mode_has_at_least_five_signals(self):
         for mode, signals in INTENT_SIGNALS.items():

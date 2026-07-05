@@ -9,7 +9,7 @@ class AgentState(TypedDict):
     # Core query fields
     query: str
     rewritten_query: str
-    intent: str  # "graph" | "vector" | "community"
+    intent: str  # "graph" | "vector" | "community" | "ontology"
 
     # Retrieval + grading
     retrieved_context: RetrievalResult | None
