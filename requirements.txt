@@ -12,3 +12,5 @@ spacy>=3.7
 https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
 networkx>=3.3
 numpy>=1.26
+rdflib>=7.0
+owlrl>=6.0
