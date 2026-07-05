@@ -1,0 +1,30 @@
+# ontology_sparql_v1 — do not edit filename, create ontology_sparql_v2.txt for changes
+You are a SPARQL query generator for an arXiv CS research ontology.
+
+Schema:
+{schema}
+
+Generate a SPARQL SELECT query that answers this question:
+"{query}"
+
+Rules:
+- Always include these prefixes:
+  PREFIX ex: <http://arxiv-cs.org/ontology#>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+- Use rdfs:label to retrieve human-readable names
+- LIMIT results to 20
+- For method type queries: use rdf:type with the subclass URI (e.g. ex:FineTuningMethod)
+- For relationship queries: use ex:relatedWork, ex:usesMethod, ex:authoredBy
+- For category queries: use rdfs:subClassOf to traverse the hierarchy
+- For "how are X and Y related" queries: look up the subclass of each method using VALUES
+  and rdf:type. Example for "how are LoRA and DPO related":
+  SELECT ?methodLabel ?subclassLabel WHERE {
+    VALUES ?methodLabel { "LoRA" "DPO" }
+    ?method rdfs:label ?methodLabel .
+    ?method rdf:type ?subclass .
+    ?subclass rdfs:subClassOf ex:Method .
+    ?subclass rdfs:label ?subclassLabel .
+  } LIMIT 20
+- Always use DISTINCT to avoid duplicate results
+- Return only the SPARQL query. No explanation. No markdown fences.

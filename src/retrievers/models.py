@@ -8,6 +8,7 @@ class RetrievalResult(BaseModel):
     source_type: str  # "vector" | "graph" | "community" | "web"
     source_metadata: dict[str, Any] = Field(default_factory=dict)
     cypher_query_used: str | None = None
+    sparql_query_used: str | None = None
     communities_used: list[str] = Field(default_factory=list)
     truncated: bool = False
 
