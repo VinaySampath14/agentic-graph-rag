@@ -1,4 +1,4 @@
-"""All 9 LangGraph agent nodes."""
+"""All LangGraph agent nodes."""
 import json
 import os
 from datetime import datetime
@@ -11,6 +11,7 @@ from src.agent.state import AgentState
 from src.retrievers import naive_retriever
 from src.retrievers import graph_retriever
 from src.retrievers import community_retriever
+from src.retrievers import ontology_retriever
 from src.retrievers import web_retriever
 from src.retrievers.router import classify
 from src.retrievers.context_budget import apply_budget
@@ -215,6 +216,23 @@ def node_community_retriever(state: AgentState) -> AgentState:
         f"Community retrieval returned {len(result.communities_used)} communities",
         communities_used=result.communities_used,
         source_type=result.source_type,
+    ))
+
+    return {**state, "retrieved_context": result, "agent_trace": trace}
+
+
+def node_ontology_retriever(state: AgentState) -> AgentState:
+    trace = list(state["agent_trace"])
+    query = state.get("rewritten_query") or state["query"]
+
+    result = ontology_retriever.retrieve(query)
+
+    trace.append(_trace_entry(
+        "ontology_retriever", "retrieved",
+        f"SPARQL query returned {len(result.context_text)} chars",
+        sparql_query=result.sparql_query_used,
+        source_type=result.source_type,
+        truncated=result.truncated,
     ))
 
     return {**state, "retrieved_context": result, "agent_trace": trace}

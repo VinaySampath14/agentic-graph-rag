@@ -28,6 +28,8 @@ dependencies = [
   "httpx>=0.27",
   "pandas>=2.2",
   "matplotlib>=3.9",
+  "rdflib>=7.0",
+  "owlrl>=6.0",
 ]
 
 [project.optional-dependencies]

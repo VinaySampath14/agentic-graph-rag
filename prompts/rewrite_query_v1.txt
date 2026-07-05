@@ -11,5 +11,8 @@ Rewrite the query to suit {next_mode} retrieval:
 - If next_mode is "graph": make it entity-centric (specific authors, methods, institutions)
 - If next_mode is "vector": make it descriptive (expand abbreviations, add synonyms)
 - If next_mode is "community": make it thematic (trends, overviews, comparative)
+- If next_mode is "ontology": make it structural — ask about categories, class membership,
+  or how methods relate hierarchically. Use words like "what types of", "what categories",
+  "how are X and Y related", "which subclass"
 
 Respond with the rewritten query only. No explanation. No quotes.

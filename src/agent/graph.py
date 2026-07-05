@@ -8,6 +8,7 @@ from src.agent.nodes import (
     node_naive_retriever,
     node_graph_retriever,
     node_community_retriever,
+    node_ontology_retriever,
     node_web_retriever,
     node_grade_context,
     node_rewrite_query,
@@ -33,6 +34,8 @@ def route_after_router(state: AgentState) -> str:
         return "local_graph_retriever"
     elif intent == "community":
         return "global_retriever"
+    elif intent == "ontology":
+        return "ontology_retriever"
     elif intent == "web":
         return "web_retriever"
     return "naive_retriever"
@@ -76,6 +79,7 @@ def build_graph() -> StateGraph:
     graph.add_node("naive_retriever", node_naive_retriever)
     graph.add_node("local_graph_retriever", node_graph_retriever)
     graph.add_node("global_retriever", node_community_retriever)
+    graph.add_node("ontology_retriever", node_ontology_retriever)
     graph.add_node("web_retriever", node_web_retriever)
     graph.add_node("grade_context", node_grade_context)
     graph.add_node("rewrite_query", node_rewrite_query)
@@ -97,6 +101,7 @@ def build_graph() -> StateGraph:
         "naive_retriever": "naive_retriever",
         "local_graph_retriever": "local_graph_retriever",
         "global_retriever": "global_retriever",
+        "ontology_retriever": "ontology_retriever",
         "web_retriever": "web_retriever",
     })
 
@@ -104,6 +109,7 @@ def build_graph() -> StateGraph:
     graph.add_edge("naive_retriever", "grade_context")
     graph.add_edge("local_graph_retriever", "grade_context")
     graph.add_edge("global_retriever", "grade_context")
+    graph.add_edge("ontology_retriever", "grade_context")
     graph.add_edge("web_retriever", "grade_context")
 
     # grade_context → generator | rewrite_query | web_retriever | force_refusal
