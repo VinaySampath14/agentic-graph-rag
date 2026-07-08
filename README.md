@@ -76,7 +76,7 @@ flowchart TD
     subgraph Retrieval
         direction LR
         NR["naive_retr."]
-        GR["graph_retr. + ontology expansion"]
+        GR["graph_retr. + ontology"]
         CR["comm_retr."]
     end
 
