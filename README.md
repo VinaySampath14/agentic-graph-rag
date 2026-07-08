@@ -135,6 +135,45 @@ flowchart TD
 
 ---
 
+## Ontology Layer
+
+The OWL ontology is a classification layer built on top of the Neo4j knowledge graph. The knowledge graph stores explicit facts — which paper uses which method, who authored what. The ontology adds *meaning* — what category each method belongs to — and uses a reasoner to infer new relationships that were never stored explicitly.
+
+### Schema (`ontology/arxiv_cs.ttl`)
+
+Five top-level classes: `Paper`, `Author`, `Institution`, `Method`, `Community`. Methods are further classified into a five-class subclass hierarchy:
+
+| Subclass | Examples |
+|---|---|
+| `FineTuningMethod` | LoRA, QLoRA, PEFT, Instruction Tuning |
+| `AttentionMethod` | Transformer, FlashAttention, MoE, SSM |
+| `AlignmentMethod` | RLHF, DPO, PPO, RLAIF |
+| `ReasoningMethod` | Chain-of-Thought, RAG, LangGraph, GNN |
+| `RetrievalMethod` | BM25, DPR, ColBERT, FAISS, Qdrant |
+
+The schema is written in OWL/RDFS Turtle format. `relatedWork` is declared as an `owl:SymmetricProperty` — if paper A is related to paper B, the reasoner infers the reverse automatically.
+
+### Build process (`src/ingestion/build_ontology.py`)
+
+1. Export all nodes and edges from Neo4j as RDF triples
+2. Classify 96 high-frequency methods into the 5 subclasses using Groq LLaMA 3.3 70B
+3. Assert subclass membership (`ex:method_LoRA rdf:type ex:FineTuningMethod`)
+4. Run `owlrl.DeductiveClosure(RDFS_Semantics)` to infer new triples — any two papers sharing a method subclass become `relatedWork`
+
+Result: **130,294 total triples** (82,573 explicit + 47,721 inferred) covering **598 / 2,000 papers (29.9%)**.
+
+### How it integrates with retrieval
+
+**Ontology retriever** — queries the in-memory RDFLib graph via LLM-generated SPARQL. Handles questions about class membership and inferred relationships: *"What category does LoRA belong to?"*, *"How are DPO and PPO related structurally?"*
+
+**Graph retriever (Option A expansion)** — when a query mentions a category keyword (`fine-tuning`, `alignment`, `reasoning`...), the graph retriever first queries the ontology for all members of that subclass, then runs Neo4j Cypher for each — turning category-level questions into specific method lookups without hardcoding method names.
+
+### Known limitation
+
+Method coverage is bounded by the 96 predefined `METHOD_PATTERNS`. Of 286 unique method strings in Neo4j, 62 matched and received subclass assertions. The remaining 224 exist in the graph but have no ontology classification. See [`ontology/SCOPE.md`](ontology/SCOPE.md) for details.
+
+---
+
 ## Quickstart
 
 ```bash
@@ -175,4 +214,4 @@ If you use this work, please cite:
 ## Related Work
 
 Closest prior work: [arXiv:2508.05660](https://arxiv.org/abs/2508.05660).  
-This work extends it with an agentic self-correction loop, mode-aware query rewriting, temporal graph edges, and per-query-type RAGAS evaluation across a controlled four-version ablation.
+This work extends it with an agentic self-correction loop, mode-aware query rewriting, temporal graph edges, an OWL ontology layer with automated method classification and owlrl reasoning, and per-query-type RAGAS evaluation across a controlled four-version ablation.
