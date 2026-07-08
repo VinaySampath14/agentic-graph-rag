@@ -19,11 +19,11 @@ for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD", "TAV
 
 EXAMPLE_QUERIES = [
     "What methods are used for parameter-efficient fine-tuning?",
+    "Which papers use alignment methods after 2023?",
     "Which institution has the most papers on multimodal learning?",
     "Which papers cite the attention mechanism paper and were published in 2026?",
     "What are the main trends in LLM safety research?",
-    "What does the original Word2Vec paper propose?",
-    "What method does the paper on MELD propose for speech language modeling?",
+    "Who are the authors of papers using retrieval methods?",
 ]
 
 EVAL_DIR = Path("data/eval")
@@ -62,6 +62,7 @@ _NL = {
     "naive_retriever":       (108, 218, 108, 34),
     "local_graph_retriever": (285, 218, 108, 34),
     "global_retriever":      (462, 218, 108, 34),
+    "ontology_retriever":    (285, 218, 108, 34),  # maps to same position as graph (hidden — internal)
     "rewrite_query":         (68,  318, 118, 34),
     "grade_context":         (285, 318, 140, 34),
     "web_retriever":         (488, 318,  92, 34),
@@ -183,21 +184,27 @@ def _build_graph_html(done: set, active: str | None, failed: set, loading: bool,
     ])
 
     kw = dict(done=done, active=active, failed=failed, retried=retried, success=success)
+    # Merge ontology_retriever into graph node visually — ontology is internal to graph retrieval
+    merged_kw = dict(**kw)
+    if "ontology_retriever" in done:
+        merged_kw = {**kw, "done": done | {"local_graph_retriever"}}
+    if "ontology_retriever" in retried:
+        merged_kw = {**kw, "retried": retried | {"local_graph_retriever"}}
     nodes = "\n".join([
-        _draw_node("query_analyser",        "query_analyser", **kw),
-        _draw_node("router",                "router",         **kw),
-        _draw_node("naive_retriever",       "vector",         **kw),
-        _draw_node("local_graph_retriever", "graph",          **kw),
-        _draw_node("global_retriever",      "community",      **kw),
-        _draw_node("rewrite_query",         "rewrite_query",  **kw),
-        _draw_node("grade_context",         "grade_context",  **kw),
-        _draw_node("web_retriever",         "web",            **kw),
-        _draw_node("force_refusal",         "force_refusal",  **kw),
-        _draw_node("generator",             "generator",      **kw),
-        _draw_node("grade_answer",          "grade_answer",   **kw),
-        _draw_circle(*_END_OOD,    "END", "END_ood",    **kw),
-        _draw_circle(*_END_FORCE,  "END", "END_force",  **kw),
-        _draw_circle(*_END_ANSWER, "END", "END_answer", **kw),
+        _draw_node("query_analyser",        "query_analyser", **merged_kw),
+        _draw_node("router",                "router",         **merged_kw),
+        _draw_node("naive_retriever",       "vector",         **merged_kw),
+        _draw_node("local_graph_retriever", "graph+ontology", **merged_kw),
+        _draw_node("global_retriever",      "community",      **merged_kw),
+        _draw_node("rewrite_query",         "rewrite_query",  **merged_kw),
+        _draw_node("grade_context",         "grade_context",  **merged_kw),
+        _draw_node("web_retriever",         "web",            **merged_kw),
+        _draw_node("force_refusal",         "force_refusal",  **merged_kw),
+        _draw_node("generator",             "generator",      **merged_kw),
+        _draw_node("grade_answer",          "grade_answer",   **merged_kw),
+        _draw_circle(*_END_OOD,    "END", "END_ood",    **merged_kw),
+        _draw_circle(*_END_FORCE,  "END", "END_force",  **merged_kw),
+        _draw_circle(*_END_ANSWER, "END", "END_answer", **merged_kw),
     ])
 
     return f"""{_SVG_STYLE}
@@ -224,7 +231,7 @@ _HERO_HTML = """
   <div style="color:#94a3b8;font-size:13.5px;line-height:1.65;margin-bottom:16px;">
     Self-correcting retrieval engine over <strong style="color:#cbd5e1;">2,000 arXiv CS papers</strong>
     (CS.AI + CS.CL &middot; 2026).<br>
-    Routes between vector, graph &amp; community modes &mdash; rewrites on failure, explains every decision.
+    Routes between vector, graph &amp; community modes &mdash; graph retrieval uses OWL ontology expansion &mdash; rewrites on failure, explains every decision.
   </div>
   <div style="display:flex;gap:7px;flex-wrap:wrap;">
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Neo4j</span>
@@ -273,17 +280,17 @@ _ABOUT_HTML = """
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px;">&#9632; Vector</div>
-      <div style="font-size:12.5px;color:#1e3a8a;font-weight:600;margin-bottom:6px;">Qdrant hybrid (BGE-M3 + BM25 + RRF)</div>
+      <div style="font-size:12.5px;color:#1e3a8a;font-weight:600;margin-bottom:6px;">Qdrant hybrid (BGE-M3 dense + SPLADE sparse, RRF + cross-encoder rerank)</div>
       <div style="font-size:12px;color:#3730a3;">Best for <em>factual / definitional</em> queries</div>
     </div>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;">
-      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;">&#9632; Graph</div>
-      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j Cypher traversal + fuzzy entity linking</div>
-      <div style="font-size:12px;color:#15803d;">Best for <em>relational / authorship</em> queries</div>
+      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;">&#9632; Graph + Ontology</div>
+      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j Cypher + fuzzy entity linking + OWL ontology expansion (130k triples)</div>
+      <div style="font-size:12px;color:#15803d;">Best for <em>relational / authorship / category</em> queries</div>
     </div>
     <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:#7e22ce;margin-bottom:4px;">&#9632; Community</div>
-      <div style="font-size:12.5px;color:#581c87;font-weight:600;margin-bottom:6px;">Leiden cluster embeddings + summaries</div>
+      <div style="font-size:12.5px;color:#581c87;font-weight:600;margin-bottom:6px;">Leiden cluster embeddings + Groq summaries</div>
       <div style="font-size:12px;color:#9333ea;">Best for <em>thematic / trend</em> queries</div>
     </div>
   </div>
@@ -293,8 +300,8 @@ _ABOUT_HTML = """
   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
               padding:14px 18px;font-family:monospace;font-size:12.5px;color:#334155;
               line-height:1.8;margin-bottom:24px;">
-    Nodes: &nbsp;2,000 Paper &middot; 9,250 Author &middot; 2,988 Institution &middot; 36 Method &middot; 8 Community<br>
-    Edges: 10,651 AUTHORED_BY &middot; 1,975 USES_METHOD &middot; 4,532 FROM_INSTITUTION
+    Nodes: &nbsp;2,000 Paper &middot; 9,250 Author &middot; 3,003 Institution &middot; 286 Method &middot; 13 Community<br>
+    Ontology: 5 method subclasses &middot; 82,573 explicit triples &middot; 47,721 inferred triples &middot; 29.9% paper coverage
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
@@ -465,7 +472,7 @@ def run_query(query: str):
     failed_nodes:  set[str] = set()
     retried_nodes: set[str] = set()  # failed but triggered a retry (orange)
     success_nodes: set[str] = set()  # final success (green)
-    _RETRIEVERS = {"naive_retriever", "local_graph_retriever", "global_retriever", "web_retriever"}
+    _RETRIEVERS = {"naive_retriever", "local_graph_retriever", "global_retriever", "ontology_retriever", "web_retriever"}
     last_retriever: str | None = None  # tracks which retriever ran most recently
 
     def _graph(loading):
@@ -530,7 +537,8 @@ def run_query(query: str):
                 extras = e.get("extras", {})
                 if "next_mode" in extras:
                     mode_map = {"vector": "naive_retriever", "graph": "local_graph_retriever",
-                                "community": "global_retriever", "web": "web_retriever"}
+                                "community": "global_retriever", "ontology": "ontology_retriever",
+                                "web": "web_retriever"}
                     next_active = mode_map.get(extras["next_mode"])
                     break
 
