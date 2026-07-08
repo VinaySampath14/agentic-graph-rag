@@ -1,22 +1,11 @@
----
-title: Agentic Graph RAG
-emoji: 🔍
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-sdk_version: "5.9.1"
-app_file: app.py
-pinned: false
-python_version: "3.11"
----
+
 
 # Agentic Graph RAG: Self-Correcting Retrieval over Scientific Literature
 
 [![HF Space](https://img.shields.io/badge/🤗%20HuggingFace-Space-yellow)](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB-008CC1?logo=neo4j)](https://neo4j.com/cloud/platform/aura-graph-database/)
-[![Qdrant](https://img.shields.io/badge/Qdrant-vector%20DB-red)](https://qdrant.tech/)
+
 
 > **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph (with OWL ontology expansion), and community retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
 
