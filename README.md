@@ -76,7 +76,9 @@ flowchart TD
     RT --> GR[graph_retr. + ontology]
     RT --> CR[comm_retr.]
 
-    NR & GR & CR --> GC[grade_context]
+    NR --> GC
+    GR --> GC
+    CR --> GC
 
     GC -->|pass| GEN[generator]
     GC -.->|fail| RW[rewrite_query]
@@ -86,7 +88,8 @@ flowchart TD
     RW -.->|rewrite| RT
     WEB --> GC
 
-    GEN --> GA[grade_answer] --> E1((END))
+    GEN --> GA[grade_answer]
+    GA --> E1((END))
     FR --> E2((END))
 
     classDef blue fill:#DCEEFF,stroke:#4a90d9,color:#000;
