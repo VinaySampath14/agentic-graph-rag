@@ -16,7 +16,7 @@ python_version: "3.11"
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph, and community retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
+> **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph, community, and OWL ontology retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
 
 **[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Architecture]](ARCHITECTURE.md)**
 
@@ -26,7 +26,7 @@ python_version: "3.11"
 
 Standard RAG systems pick one retrieval mode and have no recovery mechanism when it fails. This work asks: *can an agentic loop with mode-aware query rewriting recover queries that any single retrieval mode would refuse?*
 
-We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and wire three retrieval backends into a LangGraph state machine. When a context quality grader rejects the retrieved context, the agent rewrites the query in the vocabulary of the next retrieval mode and re-routes — up to three correction loops. A four-version ablation isolates the contribution of each component.
+We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and wire four retrieval backends into a LangGraph state machine: vector search, graph traversal, community detection, and an OWL ontology layer for class hierarchy queries. When a context quality grader rejects the retrieved context, the agent rewrites the query in the vocabulary of the next retrieval mode and re-routes — up to three correction loops. A four-version ablation isolates the contribution of each component.
 
 **Key finding:** adding a correction loop *without* query rewriting (v3) gives no coverage improvement over naive retrieval (27.5% vs 37.5%). Adding mode-aware rewriting (v4) recovers coverage to **81.2%**. The gain is entirely attributable to rewriting, not to the loop structure or web fallback.
 
@@ -78,6 +78,7 @@ flowchart TD
         NR["naive_retr."]
         GR["graph_retr."]
         CR["comm_retr."]
+        OR["ontology_retr."]
     end
 
     GC["grade_context"]
@@ -96,10 +97,12 @@ flowchart TD
     RT --> NR
     RT --> GR
     RT --> CR
+    RT --> OR
 
     NR --> GC
     GR --> GC
     CR --> GC
+    OR --> GC
 
     GC -->|pass| GEN
     GEN --> GA
@@ -119,13 +122,16 @@ flowchart TD
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
-| Vector | Qdrant hybrid (BGE-M3 dense + BM25 sparse, RRF + cross-encoder rerank) | Factual, definitional |
-| Graph | Neo4j Cypher with fuzzy entity linking, adaptive hop depth, temporal filters | Relational, authorship |
+| Vector | Qdrant hybrid (BGE-M3 dense + SPLADE sparse, RRF + cross-encoder rerank) | Factual, definitional |
+| Graph | Neo4j Cypher with fuzzy entity linking, ontology expansion, temporal filters | Relational, authorship, co-authorship |
 | Community | BGE-M3 similarity over Leiden cluster embeddings + Groq summaries | Thematic, trend |
+| Ontology | RDFLib + owlrl SPARQL over OWL graph (130k triples, 47k inferred) | Class hierarchy, method categories, inferred relationships |
 
-**Knowledge graph** — 2,000 Paper · 9,250 Author · 2,988 Institution · 36 Method · 8 Community · 17,158 edges
+**Knowledge graph** — 2,000 Paper · 9,250 Author · 3,003 Institution · 286 Method · 13 Community · ~50,000 edges
 
-**Stack** — Neo4j AuraDB · Qdrant · LangGraph · Groq LLaMA 3.3 70B · BGE-M3 · spaCy · FastAPI · Gradio
+**Ontology** — 5 method subclasses (FineTuning · Attention · Alignment · Reasoning · Retrieval) · 82,573 explicit triples · 47,721 inferred triples · 29.9% paper coverage
+
+**Stack** — Neo4j AuraDB · Qdrant · LangGraph · Groq LLaMA 3.3 70B · BGE-M3 · spaCy · rdflib · owlrl · FastAPI · Gradio
 
 ---
 
