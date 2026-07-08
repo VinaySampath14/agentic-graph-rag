@@ -67,7 +67,40 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 
 ## System
 
-![Architecture](figures/architecture.png)
+```mermaid
+flowchart TD
+    QA[query_analyser] --> RT[router]
+    QA -.->|OOD| E3((END))
+
+    RT --> NR[naive_retr.]
+    RT --> GR[graph_retr. + ontology]
+    RT --> CR[comm_retr.]
+
+    NR & GR & CR --> GC[grade_context]
+
+    GC -->|pass| GEN[generator]
+    GC -.->|fail| RW[rewrite_query]
+    GC -.->|loop=3| WEB[web_retr.]
+    GC -.->|exhausted| FR[force_refusal]
+
+    RW -.->|rewrite| RT
+    WEB --> GC
+
+    GEN --> GA[grade_answer] --> E1((END))
+    FR --> E2((END))
+
+    classDef blue fill:#DCEEFF,stroke:#4a90d9,color:#000;
+    classDef green fill:#E4F5E1,stroke:#5aab47,color:#000;
+    classDef orange fill:#FFE8B8,stroke:#e0a030,color:#000;
+    classDef red fill:#FFD6D6,stroke:#d95555,color:#000;
+    classDef gray fill:#D9D9D9,stroke:#888,color:#000;
+
+    class QA,RT,RW,GEN blue;
+    class NR,GR,CR,WEB green;
+    class GC,GA orange;
+    class FR red;
+    class E1,E2,E3 gray;
+```
 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
