@@ -55,13 +55,69 @@ SELECT ?label ?type WHERE {
 
 _groq: Groq | None = None
 _known_terms: set[str] | None = None
+_driver = None
 
 EX_TERM_PATTERN = re.compile(r"\bex:(\w+)\b")
+
+# Category-listing questions ("what are the fine-tuning methods?") are plain
+# lookups against the m.category property backfilled onto Neo4j Method nodes
+# (scripts/backfill_method_categories.py) — no reasoning involved, so they're
+# answered directly via Cypher instead of going through LLM-generated SPARQL.
+CATEGORY_KEYWORDS = {
+    "fine-tuning": "FineTuningMethod", "fine tuning": "FineTuningMethod", "finetuning": "FineTuningMethod",
+    "alignment": "AlignmentMethod",
+    "attention": "AttentionMethod",
+    "reasoning": "ReasoningMethod",
+    "retrieval": "RetrievalMethod",
+    "personalization": "PersonalizationMethod", "personalized": "PersonalizationMethod",
+    "skill learning": "AgentSkillLearningMethod", "skill evolution": "AgentSkillLearningMethod",
+    "agent skill": "AgentSkillLearningMethod",
+}
+LISTING_SIGNALS = ["what are", "which are", "list", "show me", "what methods", "which methods"]
 
 
 def get_graph() -> Graph:
     from src.agent.connections import get_ontology_graph
     return get_ontology_graph()
+
+
+def _get_driver():
+    global _driver
+    if _driver is None:
+        from src.agent.connections import get_neo4j_driver
+        _driver = get_neo4j_driver()
+    return _driver
+
+
+def _detect_category_listing(query: str) -> str | None:
+    query_lower = query.lower()
+    if not any(signal in query_lower for signal in LISTING_SIGNALS):
+        return None
+    for keyword, category in CATEGORY_KEYWORDS.items():
+        if keyword in query_lower:
+            return category
+    return None
+
+
+def _neo4j_category_lookup(category: str) -> RetrievalResult:
+    driver = _get_driver()
+    with driver.session() as session:
+        rows = session.run(
+            "MATCH (m:Method) WHERE m.category = $category RETURN m.name AS name ORDER BY m.name",
+            category=category,
+        ).data()
+
+    names = [r["name"] for r in rows]
+    if names:
+        context = f"Methods in category '{category}' ({len(names)} found):\n" + "\n".join(f"- {n}" for n in names)
+    else:
+        context = f"No methods found with category '{category}'."
+
+    return RetrievalResult(
+        context_text=context,
+        source_type="ontology",
+        source_metadata={"lookup_type": "neo4j_category_property", "category": category},
+    )
 
 
 def get_groq() -> Groq:
@@ -190,6 +246,10 @@ def _format_results(results: list[dict], query: str) -> str:
 
 
 def retrieve(query: str) -> RetrievalResult:
+    category = _detect_category_listing(query)
+    if category:
+        return _neo4j_category_lookup(category)
+
     sparql = _generate_sparql(query)
     valid, unknown = _validate_sparql(sparql)
 

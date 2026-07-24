@@ -227,9 +227,10 @@ def node_ontology_retriever(state: AgentState) -> AgentState:
 
     result = ontology_retriever.retrieve(query)
 
+    method = "SPARQL query" if result.sparql_query_used else "Neo4j category lookup"
     trace.append(_trace_entry(
         "ontology_retriever", "retrieved",
-        f"SPARQL query returned {len(result.context_text)} chars",
+        f"{method} returned {len(result.context_text)} chars",
         sparql_query=result.sparql_query_used,
         source_type=result.source_type,
         truncated=result.truncated,
