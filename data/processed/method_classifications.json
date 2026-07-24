@@ -824,5 +824,26 @@
     "confidence": 1.0,
     "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
     "needs_review": false
+  },
+  "ATLAS": {
+    "method": "ATLAS",
+    "subclass": "RetrievalMethod",
+    "confidence": 1.0,
+    "reason": "Classified by the propose-validate-write agent (scripts/classify_method_agent.py).",
+    "needs_review": false
+  },
+  "AgentSchool": {
+    "method": "AgentSchool",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Classified by the propose-validate-write agent (scripts/classify_method_agent.py).",
+    "needs_review": false
+  },
+  "Action-World Interaction Loop": {
+    "method": "Action-World Interaction Loop",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Classified by the propose-validate-write agent (scripts/classify_method_agent.py).",
+    "needs_review": false
   }
 }
