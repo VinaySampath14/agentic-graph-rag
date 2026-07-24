@@ -181,7 +181,8 @@ def compute_coverage(g: Graph) -> None:
 
     # Break down by subclass
     for subclass in ["FineTuningMethod", "AttentionMethod", "AlignmentMethod",
-                     "ReasoningMethod", "RetrievalMethod"]:
+                     "ReasoningMethod", "RetrievalMethod",
+                     "PersonalizationMethod", "AgentSkillLearningMethod"]:
         sc_uri = EX[subclass]
         methods_in_class = set(s for s, _, _ in g.triples((None, RDF.type, sc_uri)))
         papers_using = set()

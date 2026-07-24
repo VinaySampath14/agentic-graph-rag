@@ -670,5 +670,159 @@
     "confidence": 1.0,
     "reason": "Graph neural networks like GNN are classified under ReasoningMethod as per the given rules.",
     "needs_review": false
+  },
+  "acquiring missing information": {
+    "method": "acquiring missing information",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "extracting user preferences": {
+    "method": "extracting user preferences",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "inferring user preferences": {
+    "method": "inferring user preferences",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "leveraging user preferences": {
+    "method": "leveraging user preferences",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "personalized modeling": {
+    "method": "personalized modeling",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "proactive interaction": {
+    "method": "proactive interaction",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "recognizing missing information": {
+    "method": "recognizing missing information",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "updating user preferences": {
+    "method": "updating user preferences",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "utilizing user preferences": {
+    "method": "utilizing user preferences",
+    "subclass": "PersonalizationMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, cluster 6) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "SkillEvolBench": {
+    "method": "SkillEvolBench",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "compact trajectories": {
+    "method": "compact trajectories",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "curated-start skill evolution": {
+    "method": "curated-start skill evolution",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "frozen deployment": {
+    "method": "frozen deployment",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "no-skill control": {
+    "method": "no-skill control",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "raw-trajectory control": {
+    "method": "raw-trajectory control",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "self-generated skill evolution": {
+    "method": "self-generated skill evolution",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "verifier feedback": {
+    "method": "verifier feedback",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "domain-level skills": {
+    "method": "domain-level skills",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "experience generation": {
+    "method": "experience generation",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "model-generated skills": {
+    "method": "model-generated skills",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "skill consumption": {
+    "method": "skill consumption",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
+  },
+  "skill extraction": {
+    "method": "skill extraction",
+    "subclass": "AgentSkillLearningMethod",
+    "confidence": 1.0,
+    "reason": "Assigned via Leiden co-occurrence clustering (scripts/cluster_methods_experiment.py, clusters 9 + 17) — not an LLM classification pass.",
+    "needs_review": false
   }
 }

@@ -1,0 +1,56 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix ex:   <http://arxiv-cs.org/ontology#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# ── SHACL shapes — data validation, distinct from the OWL axioms in arxiv_cs.ttl.
+#
+# OWL states what SHOULD be true (meaning); SHACL checks whether instance data
+# ACTUALLY satisfies it, and reports every violation instead of declaring the
+# whole graph inconsistent. See competency questions #10, #11, #12.
+
+# ── #10 + #12 combined: every Method belongs to EXACTLY ONE category ────────
+# sh:xone ("exactly one of") fails on zero matches (uncategorized — #10)
+# AND on two-or-more matches (double-categorized — #12) in one rule.
+
+ex:MethodCategoryShape
+    a sh:NodeShape ;
+    sh:targetClass ex:Method ;
+    sh:xone (
+        [ sh:class ex:FineTuningMethod ]
+        [ sh:class ex:AttentionMethod ]
+        [ sh:class ex:AlignmentMethod ]
+        [ sh:class ex:ReasoningMethod ]
+        [ sh:class ex:RetrievalMethod ]
+        [ sh:class ex:PersonalizationMethod ]
+        [ sh:class ex:AgentSkillLearningMethod ]
+    ) ;
+    sh:message "A Method must belong to exactly one of the 7 categories (found zero or more than one)." .
+
+
+# ── #11a: every Paper must have at least one author ─────────────────────────
+# Hard violation — a paper with zero authors indicates a real ingestion bug.
+
+ex:PaperShape
+    a sh:NodeShape ;
+    sh:targetClass ex:Paper ;
+    sh:property [
+        sh:path ex:authoredBy ;
+        sh:minCount 1 ;
+        sh:message "Paper must have at least one author." ;
+    ] .
+
+
+# ── #11b: an Author should have a known institution ─────────────────────────
+# Warning, not a hard violation — missing institution is a known, expected
+# extraction limitation (not every author's affiliation is recoverable from
+# an abstract), not a sign of broken data the way a zero-author paper is.
+
+ex:AuthorShape
+    a sh:NodeShape ;
+    sh:targetClass ex:Author ;
+    sh:property [
+        sh:path ex:fromInstitution ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "Author has no known institution (informational — common extraction gap, not necessarily an error)." ;
+    ] .

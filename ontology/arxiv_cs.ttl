@@ -4,6 +4,7 @@
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix dc:   <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
 # ── Ontology metadata ─────────────────────────────────────────────────────────
 
@@ -23,11 +24,13 @@ ex:Paper
 
 ex:Author
     a owl:Class ;
+    rdfs:subClassOf foaf:Person ;
     rdfs:label "Author" ;
     rdfs:comment "A person who authored one or more papers in the corpus." .
 
 ex:Institution
     a owl:Class ;
+    rdfs:subClassOf foaf:Organization ;
     rdfs:label "Institution" ;
     rdfs:comment "A research institution or organisation affiliated with one or more authors." .
 
@@ -74,6 +77,41 @@ ex:RetrievalMethod
     rdfs:label "Retrieval Method" ;
     rdfs:comment "Methods for information retrieval and vector search. Includes dense retrievers (DPR, ColBERT), sparse retrievers (BM25), and vector databases (FAISS, Qdrant)." .
 
+ex:PersonalizationMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Personalization Method" ;
+    rdfs:comment "Methods for modeling, acquiring, or adapting to individual user preferences. Includes preference extraction/inference, personalized modeling, and proactive interaction strategies. Added from data-driven clustering over method co-occurrence — not part of the original handpicked scheme." .
+
+ex:AgentSkillLearningMethod
+    a owl:Class ;
+    rdfs:subClassOf ex:Method ;
+    rdfs:label "Agent Skill-Learning Method" ;
+    rdfs:comment "Methods for acquiring, evolving, or transferring discrete agent skills, typically via trajectory-based training or verifier feedback. Distinct from general fine-tuning in that the unit of learning is a reusable skill or behavior, not model weights broadly. Added from data-driven clustering over method co-occurrence." .
+
+
+# ── Disjointness — a Method belongs to at most one of the 7 categories ───────
+# Documents the intended semantics; not enforced at reasoning time under the
+# RDFS profile currently used in build_ontology.py. Actual enforcement on
+# instance data is done via SHACL (see ontology/shapes.ttl).
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( ex:FineTuningMethod ex:AttentionMethod ex:AlignmentMethod
+                 ex:ReasoningMethod ex:RetrievalMethod
+                 ex:PersonalizationMethod ex:AgentSkillLearningMethod ) .
+
+
+# ── Cardinality restriction — every Paper has at least one Author ───────────
+# Same caveat as above: under OWL's open-world assumption this does not
+# reject data missing an author. It documents intended semantics; SHACL
+# enforces completeness on actual instance data.
+
+ex:Paper rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:authoredBy ;
+    owl:someValuesFrom ex:Author
+] .
+
 
 # ── Object properties ─────────────────────────────────────────────────────────
 
@@ -112,6 +150,33 @@ ex:relatedWork
     rdfs:domain ex:Paper ;
     rdfs:range  ex:Paper ;
     rdfs:comment "Inferred relationship between papers that share at least one method subclass. Not stored in Neo4j — derived by the OWL reasoner." .
+
+
+# ── Inverse properties — enable backward traversal without new queries ──────
+
+ex:authorOf
+    a owl:ObjectProperty ;
+    owl:inverseOf ex:authoredBy ;
+    rdfs:label "author of" ;
+    rdfs:domain ex:Author ;
+    rdfs:range  ex:Paper ;
+    rdfs:comment "Inverse of authoredBy — relates an author to a paper they wrote." .
+
+ex:usedByPaper
+    a owl:ObjectProperty ;
+    owl:inverseOf ex:usesMethod ;
+    rdfs:label "used by paper" ;
+    rdfs:domain ex:Method ;
+    rdfs:range  ex:Paper ;
+    rdfs:comment "Inverse of usesMethod — relates a method to a paper that employs it." .
+
+ex:hasAffiliatedAuthor
+    a owl:ObjectProperty ;
+    owl:inverseOf ex:fromInstitution ;
+    rdfs:label "has affiliated author" ;
+    rdfs:domain ex:Institution ;
+    rdfs:range  ex:Author ;
+    rdfs:comment "Inverse of fromInstitution — relates an institution to an affiliated author." .
 
 
 # ── Datatype properties ───────────────────────────────────────────────────────
