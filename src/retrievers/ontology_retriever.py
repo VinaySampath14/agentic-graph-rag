@@ -1,10 +1,11 @@
 """SPARQL-based retriever over the RDFLib in-memory ontology graph."""
 import os
+import re
 from pathlib import Path
 
 from dotenv import load_dotenv
 from groq import Groq
-from rdflib import Graph
+from rdflib import Graph, OWL, RDF
 from rdflib.plugins.sparql.parser import parseQuery
 
 from src.retrievers.models import RetrievalResult
@@ -15,18 +16,22 @@ PROMPTS_DIR = Path("prompts")
 
 SCHEMA_SUMMARY = """
 Classes:
-  ex:Paper, ex:Author, ex:Institution, ex:Community
+  ex:Paper, ex:Author (subClassOf foaf:Person), ex:Institution (subClassOf foaf:Organization), ex:Community
   ex:Method (parent)
-    ex:FineTuningMethod  — LoRA, QLoRA, AdaLoRA, instruction tuning, optimisers
-    ex:AttentionMethod   — Transformer, FlashAttention, MoE, SSM, ViT
-    ex:AlignmentMethod   — RLHF, DPO, PPO, RLAIF
-    ex:ReasoningMethod   — Chain-of-Thought, RAG, GraphRAG, LangGraph, GNN, benchmarks
-    ex:RetrievalMethod   — BM25, DPR, ColBERT, FAISS, Qdrant, Milvus
+    ex:FineTuningMethod        — LoRA, QLoRA, AdaLoRA, instruction tuning, optimisers
+    ex:AttentionMethod         — Transformer, FlashAttention, MoE, SSM, ViT
+    ex:AlignmentMethod         — RLHF, DPO, PPO, RLAIF
+    ex:ReasoningMethod         — Chain-of-Thought, RAG, GraphRAG, LangGraph, GNN, benchmarks
+    ex:RetrievalMethod         — BM25, DPR, ColBERT, FAISS, Qdrant, Milvus
+    ex:PersonalizationMethod   — user preference modeling, personalized modeling, proactive interaction
+    ex:AgentSkillLearningMethod — agent skill evolution/acquisition, trajectory-based training, verifier feedback
+  The 7 Method subclasses are mutually exclusive (owl:AllDisjointClasses) — a
+  Method belongs to at most one.
 
 Object properties:
-  ex:authoredBy          Paper -> Author
-  ex:usesMethod          Paper -> Method (or subclass)
-  ex:fromInstitution     Author -> Institution
+  ex:authoredBy          Paper -> Author        (inverse: ex:authorOf)
+  ex:usesMethod          Paper -> Method (or subclass)  (inverse: ex:usedByPaper)
+  ex:fromInstitution     Author -> Institution   (inverse: ex:hasAffiliatedAuthor)
   ex:belongsToCommunity  Paper -> Community
   ex:relatedWork         Paper -> Paper  (inferred — papers sharing a method subclass)
 
@@ -34,7 +39,7 @@ Datatype properties on Paper: ex:arxivId, ex:title, ex:year, ex:venue
 Datatype properties on Author: ex:authorName
 Datatype properties on Method: ex:methodName
 
-Namespace prefix: ex: <http://arxiv-cs.org/ontology#>
+Namespace prefixes: ex: <http://arxiv-cs.org/ontology#>, foaf: <http://xmlns.com/foaf/0.1/>
 """
 
 FALLBACK_SPARQL = """
@@ -49,6 +54,9 @@ SELECT ?label ?type WHERE {
 """
 
 _groq: Groq | None = None
+_known_terms: set[str] | None = None
+
+EX_TERM_PATTERN = re.compile(r"\bex:(\w+)\b")
 
 
 def get_graph() -> Graph:
@@ -91,12 +99,58 @@ def _generate_sparql(query: str) -> str:
     return sparql
 
 
-def _validate_sparql(sparql: str) -> bool:
+def _known_schema_terms() -> set[str]:
+    """Local names of every ex: class/property actually declared in the ontology."""
+    global _known_terms
+    if _known_terms is not None:
+        return _known_terms
+    g = get_graph()
+    terms: set[str] = set()
+    for cls in (OWL.Class, OWL.ObjectProperty, OWL.DatatypeProperty, OWL.SymmetricProperty):
+        for s in g.subjects(RDF.type, cls):
+            if "arxiv-cs.org/ontology#" in str(s):
+                terms.add(str(s).split("#")[-1])
+    _known_terms = terms
+    return terms
+
+
+def _unknown_terms(sparql: str) -> list[str]:
+    """ex: terms referenced in the query that aren't declared anywhere in the schema."""
+    referenced = set(EX_TERM_PATTERN.findall(sparql))
+    return sorted(referenced - _known_schema_terms())
+
+
+def _validate_sparql(sparql: str) -> tuple[bool, list[str]]:
     try:
         parseQuery(sparql)
-        return True
     except Exception:
-        return False
+        return False, []
+    unknown = _unknown_terms(sparql)
+    return not unknown, unknown
+
+
+def _regenerate_sparql(query: str, unknown_terms: list[str]) -> str:
+    prompt_template = _load_prompt()
+    correction = (
+        f"\n\nYour previous attempt referenced these terms, which do not exist "
+        f"in the schema: {', '.join(unknown_terms)}. Use only classes and "
+        f"properties listed in the schema above. Regenerate the query."
+    )
+    prompt = (
+        prompt_template
+        .replace("{query}", query)
+        .replace("{schema}", SCHEMA_SUMMARY)
+        + correction
+    )
+    response = get_groq().chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.0,
+    )
+    sparql = response.choices[0].message.content.strip()
+    if sparql.startswith("```"):
+        sparql = "\n".join(l for l in sparql.splitlines() if not l.startswith("```")).strip()
+    return sparql
 
 
 def _execute_sparql(sparql: str) -> list[dict]:
@@ -137,8 +191,15 @@ def _format_results(results: list[dict], query: str) -> str:
 
 def retrieve(query: str) -> RetrievalResult:
     sparql = _generate_sparql(query)
+    valid, unknown = _validate_sparql(sparql)
 
-    if not _validate_sparql(sparql):
+    if not valid and unknown:
+        # Semantically invalid (hallucinated terms) but syntactically fine —
+        # give the model one corrective retry before giving up.
+        sparql = _regenerate_sparql(query, unknown)
+        valid, _ = _validate_sparql(sparql)
+
+    if not valid:
         sparql = FALLBACK_SPARQL
 
     results = _execute_sparql(sparql)
