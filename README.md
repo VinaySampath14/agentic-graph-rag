@@ -18,7 +18,7 @@ python_version: "3.11"
 [![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB-008CC1?logo=neo4j)](https://neo4j.com/cloud/platform/aura-graph-database/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-vector%20DB-red)](https://qdrant.tech/)
 
-> **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between vector, graph (with OWL ontology expansion), and community retrieval, rewrites failed queries, and recovers coverage from 27.5% → 81.2% through mode-aware self-correction.
+> **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between Vector, Graph, and Community retrieval. Graph mode selects either Neo4j/Cypher for explicit relationships or RDFLib/SPARQL for ontology semantics. The agent grades context, rewrites failed queries, and recovers coverage through mode-aware self-correction.
 
 **[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Architecture]](ARCHITECTURE.md)**
 
@@ -28,7 +28,7 @@ python_version: "3.11"
 
 Standard RAG systems pick one retrieval mode and have no recovery mechanism when it fails. This work asks: *can an agentic loop with mode-aware query rewriting recover queries that any single retrieval mode would refuse?*
 
-We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and wire three retrieval backends into a LangGraph state machine: vector search, graph traversal (with OWL ontology expansion), and community detection. When a context quality grader rejects the retrieved context, the agent rewrites the query in the vocabulary of the next retrieval mode and re-routes — up to three correction loops. A four-version ablation isolates the contribution of each component.
+We build retrieval data from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and expose three modes through a LangGraph state machine: Vector, Graph, and Community. Graph mode contains two deliberately separate paths: Neo4j/Cypher for stored relationships and RDFLib/SPARQL for OWL/RDFS semantics. When a context quality grader rejects the retrieved context, the agent rewrites the query for the next mode and re-routes — up to three correction loops. A four-version ablation isolates the contribution of each component.
 
 **Key finding:** adding a correction loop *without* query rewriting (v3) gives no coverage improvement over naive retrieval (27.5% vs 37.5%). Adding mode-aware rewriting (v4) recovers coverage to **81.2%**. The gain is entirely attributable to rewriting, not to the loop structure or web fallback.
 
@@ -74,24 +74,24 @@ We build a knowledge graph from 2,000 arXiv CS papers (CS.AI + CS.CL, 2026) and 
 | Retrieval mode | Backend | Best for |
 |----------------|---------|----------|
 | Vector | Qdrant hybrid (BGE-M3 dense + SPLADE sparse, RRF + cross-encoder rerank) | Factual, definitional |
-| Graph + Ontology | Neo4j Cypher + fuzzy entity linking + OWL ontology expansion (130k triples, 47k inferred) | Relational, authorship, method categories |
+| Graph | Neo4j/Cypher for explicit relationships; RDFLib/SPARQL for ontology semantics | Relational, authorship, method categories |
 | Community | BGE-M3 similarity over Leiden cluster embeddings + Groq summaries | Thematic, trend |
 
 **Knowledge graph** — 2,000 Paper · 9,250 Author · 3,003 Institution · 286 Method · 13 Community · ~50,000 edges
 
-**Ontology** — 5 method subclasses (FineTuning · Attention · Alignment · Reasoning · Retrieval) · 82,573 explicit triples · 47,721 inferred triples · 29.9% paper coverage
+**Ontology** — 7 method subclasses · 227,077 RDF triples · 59/286 corpus methods have reviewed classifications · 598/2,000 papers connected to methods
 
-**Stack** — Neo4j AuraDB · Qdrant · LangGraph · Groq LLaMA 3.3 70B · BGE-M3 · spaCy · rdflib · owlrl · FastAPI · Gradio
+**Stack** — Neo4j AuraDB · Qdrant · LangGraph · Groq GPT-OSS 120B · BGE-M3 · SPLADE · spaCy · RDFLib · owlrl · FastAPI · Gradio
 
 ---
 
 ## Ontology Layer
 
-The OWL ontology is a classification layer built on top of the Neo4j knowledge graph. The knowledge graph stores explicit facts — which paper uses which method, who authored what. The ontology adds *meaning* — what category each method belongs to — and uses a reasoner to infer new relationships that were never stored explicitly.
+The OWL ontology is built from a snapshot of the same corpus but queried independently from Neo4j. Neo4j stores explicit operational relationships — which paper uses which method and who authored what. The RDF graph adds semantic classes and inferred `relatedWork` links. A single retrieval request uses one graph backend; results are not blended across Neo4j and RDFLib.
 
 ### Schema (`ontology/arxiv_cs.ttl`)
 
-Five top-level classes: `Paper`, `Author`, `Institution`, `Method`, `Community`. Methods are further classified into a five-class subclass hierarchy:
+Five top-level classes are `Paper`, `Author`, `Institution`, `Method`, and `Community`. Methods can be classified into seven subclasses:
 
 | Subclass | Examples |
 |---|---|
@@ -100,27 +100,29 @@ Five top-level classes: `Paper`, `Author`, `Institution`, `Method`, `Community`.
 | `AlignmentMethod` | RLHF, DPO, PPO, RLAIF |
 | `ReasoningMethod` | Chain-of-Thought, RAG, LangGraph, GNN |
 | `RetrievalMethod` | BM25, DPR, ColBERT, FAISS, Qdrant |
+| `PersonalizationMethod` | Personalized adaptation and user-specific modelling methods |
+| `AgentSkillLearningMethod` | Agent learning, tool-use, and skill-acquisition methods |
 
 The schema is written in OWL/RDFS Turtle format. `relatedWork` is declared as an `owl:SymmetricProperty` — if paper A is related to paper B, the reasoner infers the reverse automatically.
 
 ### Build process (`src/ingestion/build_ontology.py`)
 
 1. Export all nodes and edges from Neo4j as RDF triples
-2. Classify 96 high-frequency methods into the 5 subclasses using Groq LLaMA 3.3 70B
+2. Apply reviewed method classifications across the 7 subclasses
 3. Assert subclass membership (`ex:method_LoRA rdf:type ex:FineTuningMethod`)
 4. Run `owlrl.DeductiveClosure(RDFS_Semantics)` to infer new triples — any two papers sharing a method subclass become `relatedWork`
 
-Result: **130,294 total triples** (82,573 explicit + 47,721 inferred) covering **598 / 2,000 papers (29.9%)**.
+Current result: **227,077 total triples**, including **82,582 `relatedWork` statements**, covering **598 / 2,000 papers (29.9%)** through method usage.
 
 ### How it integrates with retrieval
 
-**Ontology retriever** — queries the in-memory RDFLib graph via LLM-generated SPARQL. Handles questions about class membership and inferred relationships: *"What category does LoRA belong to?"*, *"How are DPO and PPO related structurally?"*
+**Neo4j graph backend** — uses Cypher for explicit entity relationships such as papers, authors, institutions, and methods.
 
-**Graph retriever (Option A expansion)** — when a query mentions a category keyword (`fine-tuning`, `alignment`, `reasoning`...), the graph retriever first queries the ontology for all members of that subclass, then runs Neo4j Cypher for each — turning category-level questions into specific method lookups without hardcoding method names.
+**RDFLib graph backend** — uses LLM-generated, schema-validated SPARQL for class membership and inferred relationships, for example *"What type of method is LoRA?"* The router selects this backend within Graph mode when the question is ontological.
 
 ### Known limitation
 
-Method coverage is bounded by the 96 predefined `METHOD_PATTERNS`. Of 286 unique method strings in Neo4j, 62 matched and received subclass assertions. The remaining 224 exist in the graph but have no ontology classification. See [`ontology/SCOPE.md`](ontology/SCOPE.md) for details.
+Method classification is intentionally conservative: **59 of 286** corpus method nodes currently have a reviewed category, while **227** remain unclassified instead of being forced into an incorrect class. The original LLM classification output is retained for provenance, but the populated ontology is built only from `method_classifications_reviewed.json`. SHACL treats missing classifications and affiliations as expected coverage warnings while enforcing multiple disjoint categories and papers without authors as hard violations. The current graph conforms when warnings are allowed. The interview demo uses reviewed classifications, including LoRA → `FineTuningMethod`. See [`ontology/SCOPE.md`](ontology/SCOPE.md) for details.
 
 ---
 
@@ -134,6 +136,19 @@ cp .env.example .env          # add Neo4j, Qdrant, Groq, Tavily keys
 python scripts/verify_connections.py
 python app.py                 # Gradio demo at localhost:7860
 ```
+
+For a Hugging Face Space, configure these repository secrets (never commit
+their values): `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `QDRANT_URL`,
+`QDRANT_API_KEY`, and `GROQ_API_KEY`. `GROQ_MODEL` is optional and defaults to
+`openai/gpt-oss-120b`. The final web fallback uses DuckDuckGo and does not
+require a Tavily key.
+
+Interview demo questions:
+
+1. Vector — “How does retrieval-augmented generation improve language models?”
+2. Graph/Neo4j — “Who are the authors of papers that use LoRA?”
+3. Graph/RDFLib — “What type of method is LoRA?”
+4. Community — “What are the main research themes across these papers?”
 
 Run tests:
 

@@ -14,3 +14,4 @@ networkx>=3.3
 numpy>=1.26
 rdflib>=7.0
 owlrl>=6.0
+gradio>=5.9.1,<6

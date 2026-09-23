@@ -139,7 +139,7 @@ with gr.Blocks(title="Agentic Graph RAG") as demo:
         "# Agentic Graph RAG\n"
         "Self-correcting retrieval over 2,000 arXiv CS papers. "
         "Routes between vector, graph, and community modes — rewrites on failure.\n\n"
-        "**Stack:** Neo4j · Qdrant · LangGraph · Groq LLaMA 3.3 70B · BGE-M3"
+        "**Stack:** Neo4j · Qdrant · LangGraph · Groq GPT-OSS 120B · BGE-M3"
     )
 
     with gr.Tabs():

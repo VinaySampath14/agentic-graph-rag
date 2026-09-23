@@ -11,7 +11,7 @@
 <http://arxiv-cs.org/ontology>
     a owl:Ontology ;
     dc:title "ArXiv CS Research Ontology" ;
-    dc:description "OWL ontology for 2,000 arXiv CS.AI + CS.CL papers (2026). Covers papers, authors, institutions, and research methods with a 5-category method subclass hierarchy." ;
+    dc:description "OWL ontology for 2,000 arXiv CS.AI + CS.CL papers (2026). Covers papers, authors, institutions, and research methods with a 7-category reviewed method subclass hierarchy." ;
     owl:versionInfo "1.0" .
 
 

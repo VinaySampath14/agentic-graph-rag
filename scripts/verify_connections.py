@@ -51,6 +51,6 @@ if __name__ == "__main__":
     for name, fn in CHECKS.items():
         try:
             fn()
-            print(f"✓ {name}")
+            print(f"[OK] {name}")
         except Exception as e:
-            print(f"✗ {name}: {e}")
+            print(f"[FAIL] {name}: {e}")

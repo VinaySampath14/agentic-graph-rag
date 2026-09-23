@@ -12,7 +12,9 @@ from src.retrievers.models import RetrievalResult
 
 load_dotenv()
 
-PROMPTS_DIR = Path("prompts")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROMPTS_DIR = PROJECT_ROOT / "prompts"
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 SCHEMA_SUMMARY = """
 Classes:
@@ -55,69 +57,13 @@ SELECT ?label ?type WHERE {
 
 _groq: Groq | None = None
 _known_terms: set[str] | None = None
-_driver = None
 
 EX_TERM_PATTERN = re.compile(r"\bex:(\w+)\b")
-
-# Category-listing questions ("what are the fine-tuning methods?") are plain
-# lookups against the m.category property backfilled onto Neo4j Method nodes
-# (scripts/backfill_method_categories.py) — no reasoning involved, so they're
-# answered directly via Cypher instead of going through LLM-generated SPARQL.
-CATEGORY_KEYWORDS = {
-    "fine-tuning": "FineTuningMethod", "fine tuning": "FineTuningMethod", "finetuning": "FineTuningMethod",
-    "alignment": "AlignmentMethod",
-    "attention": "AttentionMethod",
-    "reasoning": "ReasoningMethod",
-    "retrieval": "RetrievalMethod",
-    "personalization": "PersonalizationMethod", "personalized": "PersonalizationMethod",
-    "skill learning": "AgentSkillLearningMethod", "skill evolution": "AgentSkillLearningMethod",
-    "agent skill": "AgentSkillLearningMethod",
-}
-LISTING_SIGNALS = ["what are", "which are", "list", "show me", "what methods", "which methods"]
 
 
 def get_graph() -> Graph:
     from src.agent.connections import get_ontology_graph
     return get_ontology_graph()
-
-
-def _get_driver():
-    global _driver
-    if _driver is None:
-        from src.agent.connections import get_neo4j_driver
-        _driver = get_neo4j_driver()
-    return _driver
-
-
-def _detect_category_listing(query: str) -> str | None:
-    query_lower = query.lower()
-    if not any(signal in query_lower for signal in LISTING_SIGNALS):
-        return None
-    for keyword, category in CATEGORY_KEYWORDS.items():
-        if keyword in query_lower:
-            return category
-    return None
-
-
-def _neo4j_category_lookup(category: str) -> RetrievalResult:
-    driver = _get_driver()
-    with driver.session() as session:
-        rows = session.run(
-            "MATCH (m:Method) WHERE m.category = $category RETURN m.name AS name ORDER BY m.name",
-            category=category,
-        ).data()
-
-    names = [r["name"] for r in rows]
-    if names:
-        context = f"Methods in category '{category}' ({len(names)} found):\n" + "\n".join(f"- {n}" for n in names)
-    else:
-        context = f"No methods found with category '{category}'."
-
-    return RetrievalResult(
-        context_text=context,
-        source_type="ontology",
-        source_metadata={"lookup_type": "neo4j_category_property", "category": category},
-    )
 
 
 def get_groq() -> Groq:
@@ -130,7 +76,7 @@ def get_groq() -> Groq:
 def _load_prompt() -> str:
     path = PROMPTS_DIR / "ontology_sparql_v1.txt"
     lines = path.read_text(encoding="utf-8").splitlines()
-    return "\n".join(l for l in lines if not l.startswith("#")).strip()
+    return "\n".join(line for line in lines if not line.startswith("#")).strip()
 
 
 def _generate_sparql(query: str) -> str:
@@ -141,7 +87,7 @@ def _generate_sparql(query: str) -> str:
         .replace("{schema}", SCHEMA_SUMMARY)
     )
     response = get_groq().chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=GROQ_MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.0,
     )
@@ -149,8 +95,8 @@ def _generate_sparql(query: str) -> str:
     # Strip markdown fences if model ignores the instruction
     if sparql.startswith("```"):
         sparql = "\n".join(
-            l for l in sparql.splitlines()
-            if not l.startswith("```")
+            line for line in sparql.splitlines()
+            if not line.startswith("```")
         ).strip()
     return sparql
 
@@ -199,13 +145,15 @@ def _regenerate_sparql(query: str, unknown_terms: list[str]) -> str:
         + correction
     )
     response = get_groq().chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=GROQ_MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.0,
     )
     sparql = response.choices[0].message.content.strip()
     if sparql.startswith("```"):
-        sparql = "\n".join(l for l in sparql.splitlines() if not l.startswith("```")).strip()
+        sparql = "\n".join(
+            line for line in sparql.splitlines() if not line.startswith("```")
+        ).strip()
     return sparql
 
 
@@ -246,10 +194,6 @@ def _format_results(results: list[dict], query: str) -> str:
 
 
 def retrieve(query: str) -> RetrievalResult:
-    category = _detect_category_listing(query)
-    if category:
-        return _neo4j_category_lookup(category)
-
     sparql = _generate_sparql(query)
     valid, unknown = _validate_sparql(sparql)
 
@@ -267,7 +211,8 @@ def retrieve(query: str) -> RetrievalResult:
 
     return RetrievalResult(
         context_text=context,
-        source_type="ontology",
+        source_type="graph",
+        source_metadata={"graph_backend": "rdflib"},
         sparql_query_used=sparql,
         truncated=len(results) > 20,
     )

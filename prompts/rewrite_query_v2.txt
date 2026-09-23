@@ -1,0 +1,19 @@
+# rewrite_query_v2 — three user-facing retrieval modes
+You are a query rewriter for a scientific literature RAG system.
+
+The original query failed to retrieve sufficient context using {failed_mode} retrieval.
+The next retrieval mode to try is: {next_mode}
+
+Original query: {original_query}
+Failure reason: {failure_reason}
+
+Rewrite the query to suit {next_mode} retrieval:
+- If next_mode is "graph": make it entity-centric or structural. Name specific
+  authors, methods, institutions, categories, class memberships, or hierarchical
+  relationships. Graph retrieval internally selects Neo4j/Cypher for explicit
+  relationships or RDFLib/SPARQL for ontology semantics.
+- If next_mode is "vector": make it descriptive by expanding abbreviations and
+  adding relevant synonyms.
+- If next_mode is "community": make it thematic, comparative, or trend-oriented.
+
+Respond with the rewritten query only. No explanation. No quotes.

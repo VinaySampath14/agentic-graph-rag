@@ -1,5 +1,4 @@
 """Unit tests for LangGraph conditional edge functions — no network required."""
-import pytest
 from langgraph.graph import END
 
 from src.agent.graph import (
@@ -17,6 +16,7 @@ def _state(**overrides):
         "query": "test query",
         "rewritten_query": "test query",
         "intent": "vector",
+        "graph_backend": None,
         "retrieved_context": None,
         "grade_result": None,
         "answer": "",
@@ -47,8 +47,13 @@ class TestRouteAfterAnalyser:
 # ── route_after_router ─────────────────────────────────────────────────────
 
 class TestRouteAfterRouter:
-    def test_graph_intent_goes_to_graph_retriever(self):
-        assert route_after_router(_state(intent="graph")) == "local_graph_retriever"
+    def test_graph_neo4j_goes_to_cypher_retriever(self):
+        state = _state(intent="graph", graph_backend="neo4j")
+        assert route_after_router(state) == "local_graph_retriever"
+
+    def test_graph_rdflib_goes_to_sparql_retriever(self):
+        state = _state(intent="graph", graph_backend="rdflib")
+        assert route_after_router(state) == "ontology_retriever"
 
     def test_community_intent_goes_to_global_retriever(self):
         assert route_after_router(_state(intent="community")) == "global_retriever"

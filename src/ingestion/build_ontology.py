@@ -16,7 +16,7 @@ load_dotenv()
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 SCHEMA_FILE  = Path("ontology/arxiv_cs.ttl")
-CLASSIF_FILE = Path("data/processed/method_classifications.json")
+CLASSIF_FILE = Path("data/processed/method_classifications_reviewed.json")
 OUTPUT_FILE  = Path("ontology/arxiv_cs_populated.ttl")
 
 # ── Namespaces ────────────────────────────────────────────────────────────────
@@ -170,6 +170,44 @@ def apply_method_subclasses(g: Graph, classifications: dict) -> int:
     return count
 
 
+# ── Infer relatedWork between papers sharing a method subclass ───────────────
+# RDFS reasoning has no rule for "two individuals sharing a class membership
+# get a new relationship" — that requires a custom rule, not generic RDFS
+# entailment, so it's computed explicitly here rather than left to owlrl.
+
+METHOD_SUBCLASSES = [
+    "FineTuningMethod", "AttentionMethod", "AlignmentMethod",
+    "ReasoningMethod", "RetrievalMethod",
+    "PersonalizationMethod", "AgentSkillLearningMethod",
+]
+
+
+def infer_related_work(g: Graph) -> int:
+    from collections import defaultdict
+    from itertools import combinations
+
+    papers_by_subclass: dict[str, set] = defaultdict(set)
+    for subclass in METHOD_SUBCLASSES:
+        methods_in_class = set(s for s, _, _ in g.triples((None, RDF.type, EX[subclass])))
+        for m_uri in methods_in_class:
+            for p_uri, _, _ in g.triples((None, EX.usesMethod, m_uri)):
+                papers_by_subclass[subclass].add(p_uri)
+
+    seen_pairs: set[tuple[str, str]] = set()
+    count = 0
+    for subclass, papers in papers_by_subclass.items():
+        for p1, p2 in combinations(sorted(papers), 2):
+            pair_key = (str(p1), str(p2))
+            if pair_key in seen_pairs:
+                continue
+            seen_pairs.add(pair_key)
+            g.add((p1, EX.relatedWork, p2))
+            g.add((p2, EX.relatedWork, p1))
+            count += 2
+
+    return count
+
+
 # ── Coverage metric ───────────────────────────────────────────────────────────
 
 def compute_coverage(g: Graph) -> None:
@@ -207,7 +245,7 @@ def build_ontology() -> None:
 
     print("\nExporting Neo4j graph to RDF...")
     stats = export_from_neo4j(g)
-    print(f"\nNeo4j export complete:")
+    print("\nNeo4j export complete:")
     for k, v in stats.items():
         print(f"  {k}: {v}")
     print(f"  Total triples so far: {len(g)}")
@@ -215,6 +253,11 @@ def build_ontology() -> None:
     print("\nApplying method subclass assertions...")
     count = apply_method_subclasses(g, classifications)
     print(f"  Subclass assertions added: {count}")
+    print(f"  Total triples so far: {len(g)}")
+
+    print("\nInferring relatedWork between papers sharing a method subclass...")
+    related_count = infer_related_work(g)
+    print(f"  relatedWork triples added: {related_count}")
     print(f"  Total triples so far: {len(g)}")
 
     print("\nRunning OWL reasoner (RDFS semantics)...")

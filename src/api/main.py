@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     _get_cross_encoder()
     get_neo4j_driver()
     get_qdrant_client()
-    get_ontology_graph()    # RDFLib in-memory graph (130k triples)
+    get_ontology_graph()    # RDFLib in-memory graph (currently 227k+ triples)
     _get_groq()
     get_graph()
     print("Pre-warm complete.")
@@ -164,6 +164,7 @@ def query(request: QueryRequest):
         "query": request.query,
         "rewritten_query": request.query,
         "intent": "",
+        "graph_backend": "neo4j",
         "retrieved_context": None,
         "grade_result": None,
         "answer": "",

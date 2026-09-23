@@ -1,7 +1,7 @@
 """All LangGraph agent nodes."""
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from groq import Groq
@@ -15,12 +15,14 @@ from src.retrievers import ontology_retriever
 from src.retrievers import web_retriever
 from src.retrievers.router import classify
 from src.retrievers.context_budget import apply_budget
-from src.retrievers.models import GradeResult, GeneratorOutput
+from src.retrievers.models import GradeResult
 
 load_dotenv()
 
-PROMPTS_DIR = Path("prompts")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROMPTS_DIR = PROJECT_ROOT / "prompts"
 LOOP_GUARD = 3
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 _groq_client: Groq | None = None
 
@@ -35,7 +37,7 @@ def _get_groq() -> Groq:
 def _load_prompt(filename: str) -> str:
     path = PROMPTS_DIR / filename
     lines = path.read_text(encoding="utf-8").splitlines()
-    return "\n".join(l for l in lines if not l.startswith("#")).strip()
+    return "\n".join(line for line in lines if not line.startswith("#")).strip()
 
 
 def _trace_entry(node: str, decision: str, reason: str, **extras) -> dict:
@@ -43,7 +45,7 @@ def _trace_entry(node: str, decision: str, reason: str, **extras) -> dict:
         "node": node,
         "decision": decision,
         "reason": reason,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "extras": extras,
     }
 
@@ -59,7 +61,7 @@ def _groq_json(prompt: str, system: str = "") -> dict:
     for attempt in range(3):
         try:
             response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model=GROQ_MODEL,
                 messages=messages,
                 temperature=0.0,
                 response_format={"type": "json_object"},
@@ -123,16 +125,19 @@ def node_query_analyser(state: AgentState) -> AgentState:
     # Classify intent
     routing = classify(query, mode_history=[])
     intent = routing["primary_mode"]
+    graph_backend = routing.get("graph_backend", "neo4j")
 
     trace.append(_trace_entry(
         "query_analyser", f"intent={intent}",
         f"Classified as '{intent}' with confidence {routing['confidence']}",
         scores=routing.get("all_scores", {}),
+        graph_backend=graph_backend if intent == "graph" else None,
     ))
 
     return {
         **state,
         "intent": intent,
+        "graph_backend": graph_backend,
         "low_confidence": routing["low_confidence"],
         "fallback_mode": routing.get("fallback_mode"),
         "loop_count": 0,
@@ -156,17 +161,20 @@ def node_router(state: AgentState) -> AgentState:
 
     routing = classify(query, mode_history=mode_history)
     intent = routing["primary_mode"]
+    graph_backend = routing.get("graph_backend", "neo4j")
 
     trace.append(_trace_entry(
         "router", f"dispatch={intent}",
         f"Routing to '{intent}' (confidence={routing['confidence']}, history={mode_history})",
         low_confidence=routing["low_confidence"],
         fallback_mode=routing.get("fallback_mode"),
+        graph_backend=graph_backend if intent == "graph" else None,
     ))
 
     return {
         **state,
         "intent": intent,
+        "graph_backend": graph_backend,
         "low_confidence": routing["low_confidence"],
         "fallback_mode": routing.get("fallback_mode"),
         "agent_trace": trace,
@@ -199,6 +207,7 @@ def node_graph_retriever(state: AgentState) -> AgentState:
         "local_graph_retriever", "retrieved",
         f"Graph traversal returned {len(result.context_text)} chars",
         cypher_query=result.cypher_query_used,
+        graph_backend="neo4j",
         source_type=result.source_type,
     ))
 
@@ -227,11 +236,11 @@ def node_ontology_retriever(state: AgentState) -> AgentState:
 
     result = ontology_retriever.retrieve(query)
 
-    method = "SPARQL query" if result.sparql_query_used else "Neo4j category lookup"
     trace.append(_trace_entry(
         "ontology_retriever", "retrieved",
-        f"{method} returned {len(result.context_text)} chars",
+        f"RDFLib/SPARQL returned {len(result.context_text)} chars",
         sparql_query=result.sparql_query_used,
+        graph_backend="rdflib",
         source_type=result.source_type,
         truncated=result.truncated,
     ))
@@ -296,7 +305,7 @@ def node_rewrite_query(state: AgentState) -> AgentState:
     routing = classify(original_query, mode_history=mode_history)
     next_mode = routing["primary_mode"]
 
-    prompt_template = _load_prompt("rewrite_query_v1.txt")
+    prompt_template = _load_prompt("rewrite_query_v3.txt")
     prompt = (
         prompt_template
         .replace("{failed_mode}", failed_mode)
@@ -311,7 +320,7 @@ def node_rewrite_query(state: AgentState) -> AgentState:
         for attempt in range(3):
             try:
                 response = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model=GROQ_MODEL,
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.0,
                 )
@@ -334,7 +343,7 @@ def node_rewrite_query(state: AgentState) -> AgentState:
         failed_mode=failed_mode,
         next_mode=next_mode,
         loop_count=loop_count,
-        prompt_version="rewrite_query_v1",
+        prompt_version="rewrite_query_v3",
     ))
 
     return {
@@ -359,7 +368,7 @@ def node_generator(state: AgentState) -> AgentState:
     else:
         budgeted_context, truncated = apply_budget(vector_context=context.context_text)
 
-    prompt_template = _load_prompt("generator_v1.txt")
+    prompt_template = _load_prompt("generator_v2.txt")
     prompt = (
         prompt_template
         .replace("{query}", query)
@@ -382,7 +391,7 @@ def node_generator(state: AgentState) -> AgentState:
         f"Answer generated ({len(answer)} chars), {len(citations)} citations",
         mode=context.source_type,
         truncated=truncated,
-        prompt_version="generator_v1",
+        prompt_version="generator_v2",
     ))
 
     return {
@@ -413,11 +422,21 @@ def node_grade_answer(state: AgentState) -> AgentState:
     query = state.get("rewritten_query") or state["query"]
     context = state["retrieved_context"]
 
-    prompt_template = _load_prompt("grade_answer_v1.txt")
+    # Grade against the same token-budgeted context the generator received.
+    # A fixed character slice can include only the first retrieved paper and
+    # incorrectly reject claims grounded in later results.
+    if context.source_type == "graph":
+        grading_context, _ = apply_budget(graph_context=context.context_text)
+    elif context.source_type == "community":
+        grading_context, _ = apply_budget(community_context=context.context_text)
+    else:
+        grading_context, _ = apply_budget(vector_context=context.context_text)
+
+    prompt_template = _load_prompt("grade_answer_v2.txt")
     prompt = (
         prompt_template
         .replace("{query}", query)
-        .replace("{context}", context.context_text[:2000] if context else "")
+        .replace("{context}", grading_context)
         .replace("{answer}", state["answer"])
     )
 
@@ -433,7 +452,7 @@ def node_grade_answer(state: AgentState) -> AgentState:
         "grade_answer",
         "pass" if passed else "fail",
         reason,
-        prompt_version="grade_answer_v1",
+        prompt_version="grade_answer_v2",
     ))
 
     if not passed:

@@ -1,0 +1,16 @@
+# grade_answer_v2 — grade against the same budgeted context used for generation
+You are an answer quality judge for a scientific literature RAG system.
+
+Verify that the generated answer meets both criteria:
+1. Grounded: every specific claim is supported by any part of the provided context.
+2. Relevant: the answer directly addresses the query.
+
+The context can contain several retrieved papers separated by delimiters. Check
+the complete context before deciding that a claim is unsupported.
+
+Query: {query}
+Context: {context}
+Answer: {answer}
+
+Respond with JSON only:
+{"pass": true/false, "reason": "specific issue if fail, or 'grounded and relevant' if pass"}

@@ -4,7 +4,8 @@ INTENT_SIGNALS: dict[str, list[str]] = {
     "graph": [
         "who", "which", "cites", "cited by", "collaborated", "co-author",
         "institution", "author", "wrote", "published by", "works at",
-        "from", "affiliation", "paper by",
+        "from", "affiliation", "paper by", "researcher", "researchers",
+        "people behind", "researchers behind",
     ],
     "community": [
         "trend", "trends", "overview", "main topics", "across", "landscape",
@@ -19,14 +20,19 @@ INTENT_SIGNALS: dict[str, list[str]] = {
         "papers about", "papers on", "research on", "fine-tuning",
         "fine tuning", "training", "evaluation", "performance",
     ],
-    "ontology": [
-        "what types of", "what kinds of", "type of method", "subtype of",
-        "what categories", "which categories", "category of", "categories of",
-        "classify", "belong to", "hierarchy", "subclass of",
-        "implicitly related", "same category", "infer", "structurally related",
-        "what methods exist", "what methods are", "how are", "related to each other",
-    ],
 }
+
+RDFLIB_SIGNALS = [
+    "what type of", "what types of", "what kinds of", "type of method", "subtype of",
+    "what categories", "which categories", "category of", "categories of",
+    "classify", "belong to", "hierarchy", "subclass of",
+    "implicitly related", "same category", "infer", "structurally related",
+    "what methods exist", "what methods are", "related to each other",
+    "different fine-tuning methods", "different fine tuning methods",
+    "different finetuning methods", "types of fine-tuning", "types of fine tuning",
+    "types of finetuning", "kinds of fine-tuning", "kinds of fine tuning",
+    "list fine-tuning methods", "list fine tuning methods",
+]
 
 LOW_CONFIDENCE_THRESHOLD = 2
 
@@ -47,12 +53,17 @@ def classify(query: str, mode_history: list[str] | None = None) -> dict:
         mode_history = []
 
     query_lower = query.lower()
-    scores: dict[str, int] = {"graph": 0, "community": 0, "vector": 0, "ontology": 0}
+    scores: dict[str, int] = {"graph": 0, "community": 0, "vector": 0}
 
     for intent, signals in INTENT_SIGNALS.items():
         for signal in signals:
             if signal in query_lower:
                 scores[intent] += 1
+
+    rdflib_score = sum(signal in query_lower for signal in RDFLIB_SIGNALS)
+    # An explicit ontology phrase must outrank generic words such as "method"
+    # and "fine-tuning", which also appear in vector-style questions.
+    scores["graph"] += rdflib_score * 3
 
     # Remove modes already tried
     available = {k: v for k, v in scores.items() if k not in mode_history}
@@ -60,6 +71,7 @@ def classify(query: str, mode_history: list[str] | None = None) -> dict:
     if not available:
         return {
             "primary_mode": "web",
+            "graph_backend": None,
             "confidence": 0,
             "low_confidence": True,
             "fallback_mode": None,
@@ -78,6 +90,9 @@ def classify(query: str, mode_history: list[str] | None = None) -> dict:
 
     return {
         "primary_mode": primary_mode,
+        "graph_backend": (
+            "rdflib" if rdflib_score else "neo4j"
+        ) if primary_mode == "graph" else None,
         "confidence": confidence,
         "low_confidence": low_confidence,
         "fallback_mode": fallback_mode,

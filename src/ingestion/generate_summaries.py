@@ -12,6 +12,7 @@ load_dotenv()
 
 PROMPT_FILE = Path("prompts/community_summary_v1.txt")
 COMMUNITIES_FILE = Path("data/processed/communities.jsonl")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 
 def get_driver():
@@ -37,7 +38,7 @@ def summarise_community(
     for attempt in range(3):
         try:
             response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=GROQ_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
                 response_format={"type": "json_object"},
