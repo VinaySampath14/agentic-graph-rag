@@ -20,7 +20,7 @@ python_version: "3.11"
 
 > **TL;DR** — A LangGraph agent over 2,000 arXiv CS papers that routes between Vector, Graph, and Community retrieval. Graph mode selects either Neo4j/Cypher for explicit relationships or RDFLib/SPARQL for ontology semantics. The agent grades context, rewrites failed queries, and recovers coverage through mode-aware self-correction.
 
-**[[Live Demo]](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [[Architecture]](ARCHITECTURE.md)**
+**[Live Demo](https://huggingface.co/spaces/VinaySampath/agentic-graph-rag) · [Architecture](ARCHITECTURE.md) · [Ontology](ONTOLOGY.md) · [Contributing](CONTRIBUTING.md)**
 
 ---
 
@@ -95,10 +95,10 @@ Five top-level classes are `Paper`, `Author`, `Institution`, `Method`, and `Comm
 
 | Subclass | Examples |
 |---|---|
-| `FineTuningMethod` | LoRA, QLoRA, PEFT, Instruction Tuning |
-| `AttentionMethod` | Transformer, FlashAttention, MoE, SSM |
+| `FineTuningMethod` | LoRA, QLoRA, AdaLoRA, Instruction Tuning |
+| `AttentionMethod` | Transformer, Flash Attention, MoE, Cross-Attention |
 | `AlignmentMethod` | RLHF, DPO, PPO, RLAIF |
-| `ReasoningMethod` | Chain-of-Thought, RAG, LangGraph, GNN |
+| `ReasoningMethod` | Chain-of-Thought, RAG, LangGraph, ReAct |
 | `RetrievalMethod` | BM25, DPR, ColBERT, FAISS, Qdrant |
 | `PersonalizationMethod` | Personalized adaptation and user-specific modelling methods |
 | `AgentSkillLearningMethod` | Agent learning, tool-use, and skill-acquisition methods |
@@ -132,7 +132,7 @@ Method classification is intentionally conservative: **59 of 286** corpus method
 git clone https://github.com/VinaySampath14/agentic-graph-rag.git
 cd agentic-graph-rag
 pip install -e ".[dev]"
-cp .env.example .env          # add Neo4j, Qdrant, Groq, Tavily keys
+cp .env.example .env          # add Neo4j, Qdrant, and Groq credentials
 python scripts/verify_connections.py
 python app.py                 # Gradio demo at localhost:7860
 ```
@@ -140,8 +140,8 @@ python app.py                 # Gradio demo at localhost:7860
 For a Hugging Face Space, configure these repository secrets (never commit
 their values): `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `QDRANT_URL`,
 `QDRANT_API_KEY`, and `GROQ_API_KEY`. `GROQ_MODEL` is optional and defaults to
-`openai/gpt-oss-120b`. The final web fallback uses DuckDuckGo and does not
-require a Tavily key.
+`openai/gpt-oss-120b`. The final web fallback uses DuckDuckGo and requires no
+additional search API key.
 
 Interview demo questions:
 

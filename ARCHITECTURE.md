@@ -1,6 +1,8 @@
 # Architecture
 
-Agentic Graph RAG is a self-correcting retrieval engine over 2,000 arXiv CS papers. A LangGraph state machine routes queries between three retrieval backends, grades context quality, and rewrites failed queries into the vocabulary of the next mode — up to three correction loops before a structured refusal.
+Agentic Graph RAG is a self-correcting retrieval engine over 2,000 arXiv CS papers. A LangGraph state machine exposes three user-facing modes—Vector, Graph, and Community—grades retrieved context, and rewrites failed queries for an untried mode. Graph mode selects exactly one of two independent backends: Neo4j/Cypher for explicit relationships or RDFLib/SPARQL for ontology semantics.
+
+[README](README.md) | [Ontology](ONTOLOGY.md) | [Contributing](CONTRIBUTING.md) | [Detailed ontology scope](ontology/SCOPE.md)
 
 ---
 
@@ -22,7 +24,7 @@ agentic-graph-rag/
 │   │   ├── graph_retriever.py    # Neo4j Cypher traversal
 │   │   ├── ontology_retriever.py # RDFLib/SPARQL semantic queries (Graph backend)
 │   │   ├── community_retriever.py# Leiden community embedding similarity
-│   │   ├── web_retriever.py      # Tavily web search fallback
+│   │   ├── web_retriever.py      # DuckDuckGo web search fallback
 │   │   ├── context_budget.py     # Token-aware context truncation
 │   │   └── models.py             # Shared Pydantic models
 │   ├── api/
@@ -74,7 +76,7 @@ query_analyser → router → [retriever] → grade_context
 | `local_graph_retriever` | Neo4j Cypher for explicit relationships and entity traversal |
 | `ontology_retriever` | RDFLib/SPARQL for ontology classes and inferred relationships; internally part of Graph mode |
 | `global_retriever` | BGE-M3 cosine similarity against pre-embedded Leiden community nodes |
-| `web_retriever` | Tavily search, triggered only at `loop_count == 3` |
+| `web_retriever` | DuckDuckGo search, triggered only after corpus modes are exhausted |
 | `grade_context` | Binary LLM judge: is the retrieved context sufficient to answer? |
 | `rewrite_query` | Mode-aware reformulation — entity-centric for graph, trend-oriented for community |
 | `generator` | Configurable Groq model (default: GPT-OSS 120B) for grounded answer synthesis and citation extraction |
@@ -83,7 +85,7 @@ query_analyser → router → [retriever] → grade_context
 
 ### Loop control
 
-`AgentState.loop_count` increments on every `rewrite_query` call. At `loop_count == 3` the router diverts to `web_retriever`. At `loop_count == 4` (web also failed) `force_refusal` fires. `mode_history` tracks which retrieval modes have been tried and excludes them from re-dispatch.
+`AgentState.loop_count` increments on every `rewrite_query` call. `mode_history` records failed corpus modes and excludes them from redispatch. After Vector, Graph, and Community are exhausted, the router uses `web_retriever`; if web context is also insufficient, `force_refusal` returns a structured refusal.
 
 ---
 
@@ -108,8 +110,8 @@ It is best for relational and authorship queries.
 ### Community (global_retriever)
 Each of the 13 Leiden-detected research communities has a BGE-M3 embedding and a Groq-generated JSON summary (theme, dominant methods, key authors, representative papers). At query time, cosine similarity selects the top-3 communities. Best for thematic and trend queries.
 
-### Web (web_retriever)
-Tavily search, used only as a last resort at `loop_count == 3`. Results are formatted as context and passed to `grade_context` like any other retriever.
+### Web fallback (web_retriever)
+DuckDuckGo search is used only after all three corpus modes are exhausted. Results pass through the same context and answer graders as local retrieval.
 
 ---
 
@@ -160,4 +162,14 @@ Ablation graphs live in `src/agent/ablations.py`.
 
 80 queries stratified by type (30 factual / 30 relational / 20 thematic). Each version is evaluated with RAGAS (faithfulness, answer relevancy, context precision, context recall) using GPT-4o-mini as judge. Results are stored in `data/eval/` as JSONL files.
 
-See the [paper](Agentic_graph_rag/main.tex) for full results.
+See the [paper source](Agentic_graph_rag/main.tex) for full results.
+
+---
+
+## Current validation snapshot
+
+- Qdrant: 2,000 paper records with dense and sparse vectors
+- Neo4j: 2,000 papers, 9,250 authors, 286 methods, and 13 communities
+- RDFLib: 227,077 triples and 59 reviewed method classifications
+- SHACL: hard constraints conform; incomplete classifications and affiliations are warnings
+- Unit tests: 59 passing

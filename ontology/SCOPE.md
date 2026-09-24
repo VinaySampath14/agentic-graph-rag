@@ -11,30 +11,35 @@ The ontology (`arxiv_cs_populated.ttl`) is built from the 2,000-paper arXiv CS.A
 - `Method` — 286 method nodes extracted from abstracts
 - `Community` — 13 Leiden-detected research communities
 
-### Method Subclass Hierarchy (new — not in Neo4j)
+### Reviewed Method Subclass Hierarchy (not used by Neo4j retrieval)
 | Subclass | Description | Example methods |
 |---|---|---|
-| `FineTuningMethod` | Model adaptation techniques | LoRA, QLoRA, PEFT, Instruction Tuning |
-| `AttentionMethod` | Attention-based architectures | Transformer, FlashAttention, MoE, SSM |
+| `FineTuningMethod` | Model adaptation techniques | LoRA, QLoRA, AdaLoRA, Instruction Tuning |
+| `AttentionMethod` | Attention-based architectures | Transformer, Flash Attention, Cross-Attention |
 | `AlignmentMethod` | Human preference alignment | RLHF, DPO, PPO, RLAIF |
-| `ReasoningMethod` | Reasoning and agentic methods | Chain-of-Thought, RAG, LangGraph, GNN |
+| `ReasoningMethod` | Reasoning and agentic methods | Chain-of-Thought, RAG, LangGraph, ReAct |
 | `RetrievalMethod` | Information retrieval | BM25, DPR, ColBERT, FAISS, Qdrant |
+| `PersonalizationMethod` | User-specific adaptation | Preference inference, personalized modeling |
+| `AgentSkillLearningMethod` | Reusable agent skill acquisition | Skill extraction, verifier feedback |
 
 ### Inferred Relationships
 - `relatedWork` — derived by the OWL reasoner between papers sharing a method subclass. Not stored in Neo4j; created at build time by owlrl.
 
 ### Scale
-- **130,294 total triples** (82,573 explicit + 47,721 inferred)
+- **227,077 total triples**
+- **82,582 `relatedWork` triples**
 - **598 / 2,000 papers (29.9%)** have at least one method represented in the ontology
 
 ## Known Limitation
 
-Method coverage is bounded by the predefined `METHOD_PATTERNS` list in `src/ingestion/extract_entities.py`. This list covers 96 high-frequency methods chosen to represent the most common techniques in CS.AI and CS.CL literature.
+Neo4j contains 286 method strings extracted from the corpus. The populated ontology applies reviewed categories to 59 methods that actually occur in the graph. The remaining 227 stay valid `ex:Method` instances but intentionally have no subclass assertion until reviewed.
 
-Neo4j contains 286 unique method strings extracted from the corpus. Of these, 62 matched the predefined list and received subclass assertions. The remaining 224 method strings are free-text extractions that did not match the vocabulary — they are present in the graph as `ex:Method` instances but have no subclass classification.
+The original LLM classifications remain in `data/processed/method_classifications.json` for provenance. The build uses only `data/processed/method_classifications_reviewed.json`, preventing models, optimizers, and normalization layers from being forced into unrelated semantic categories.
 
-Papers not using any of the 96 predefined methods are retrievable via vector and graph modes but are not represented in the ontology hierarchy.
+Papers without a reviewed method category remain retrievable through Vector and Neo4j Graph retrieval but do not participate in category-derived `relatedWork` inference.
 
 ## Future Work
 
-Replace the regex-based `METHOD_PATTERNS` with LLM-assisted method extraction from abstracts (Option A in the project plan). This would expand coverage from 96 predefined terms to the full method vocabulary in the corpus, estimated at 150-200 unique methods appearing in 5+ papers.
+Expand the reviewed classification set with human-in-the-loop proposals. Each accepted category should pass SHACL before it is added to the build input.
+
+See the repository-level [Ontology guide](../ONTOLOGY.md) for architecture, build instructions, validation policy, and example SPARQL.
