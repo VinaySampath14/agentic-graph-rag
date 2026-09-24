@@ -9,14 +9,11 @@ from fastembed import SparseTextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
-    NamedSparseVector,
-    NamedVector,
     PointStruct,
     SparseIndexParams,
     SparseVector,
     SparseVectorParams,
     VectorParams,
-    VectorsConfig,
 )
 
 load_dotenv()
@@ -66,6 +63,13 @@ def ingest(papers: list[dict]) -> None:
     client = get_client()
     create_collection(client)
 
+    existing_count = client.count(
+        collection_name=COLLECTION_NAME,
+        exact=True,
+    ).count
+    if existing_count:
+        print(f"Resuming after {existing_count} existing points.")
+
     print("Loading BGE-M3 embedding model...")
     dense_model = FlagModel(
         "BAAI/bge-m3",
@@ -77,9 +81,9 @@ def ingest(papers: list[dict]) -> None:
     sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
 
     total = len(papers)
-    uploaded = 0
+    uploaded = existing_count
 
-    for batch_start in range(0, total, BATCH_SIZE):
+    for batch_start in range(existing_count, total, BATCH_SIZE):
         batch = papers[batch_start: batch_start + BATCH_SIZE]
         abstracts = [p["abstract"] for p in batch]
 

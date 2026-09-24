@@ -2,12 +2,14 @@
 
 ## Local Setup
 
-**Requirements:** Python 3.11, a Neo4j AuraDB instance, a Qdrant cloud cluster, and API keys for Groq and Tavily.
+**Requirements:** Python 3.11, a Neo4j AuraDB instance, a Qdrant Cloud cluster, and a Groq API key. The final web fallback uses DuckDuckGo and does not require a separate API key.
 
 ```bash
 git clone https://github.com/VinaySampath14/agentic-graph-rag.git
 cd agentic-graph-rag
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m venv .venv
+# Linux/macOS: source .venv/bin/activate
+# PowerShell:   .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 cp .env.example .env   # fill in your credentials
 python scripts/verify_connections.py
@@ -22,7 +24,8 @@ NEO4J_PASSWORD=...
 QDRANT_URL=https://...
 QDRANT_API_KEY=...
 GROQ_API_KEY=...
-TAVILY_API_KEY=...
+# Optional override; defaults to openai/gpt-oss-120b
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 ---
@@ -50,7 +53,7 @@ pytest tests/unit/ -v
 pytest tests/ -v
 ```
 
-Unit tests stub all heavy dependencies (Neo4j, Qdrant, BGE-M3, Groq) via `tests/conftest.py` — they run anywhere without credentials.
+Unit tests isolate external services and run without credentials. Live smoke tests in `scripts/` require the configured services.
 
 ---
 
@@ -76,4 +79,4 @@ Unit tests stub all heavy dependencies (Neo4j, Qdrant, BGE-M3, Groq) via `tests/
 
 ## Repo Structure
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for a full walkthrough of the codebase.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the system walkthrough and [ONTOLOGY.md](ONTOLOGY.md) for the RDF/OWL design.

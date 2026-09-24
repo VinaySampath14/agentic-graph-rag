@@ -10,6 +10,11 @@ class TestClassifyPrimaryMode:
         result = classify("Who are the authors of papers using LoRA?")
         assert result["primary_mode"] == "graph"
 
+    def test_indirect_researcher_wording_routes_graph(self):
+        result = classify("Explain the researchers behind LoRA papers.")
+        assert result["primary_mode"] == "graph"
+        assert result["graph_backend"] == "neo4j"
+
     def test_institution_query_routes_graph(self):
         result = classify("Which institution published the most papers on RLHF?")
         assert result["primary_mode"] == "graph"
@@ -43,11 +48,11 @@ class TestModeHistoryExclusion:
         assert result["primary_mode"] != "graph"
 
     def test_all_modes_tried_falls_back_to_web(self):
-        result = classify("What is BERT?", mode_history=["vector", "graph", "community", "ontology"])
+        result = classify("What is BERT?", mode_history=["vector", "graph", "community"])
         assert result["primary_mode"] == "web"
 
     def test_web_mode_has_zero_confidence(self):
-        result = classify("Any query", mode_history=["vector", "graph", "community", "ontology"])
+        result = classify("Any query", mode_history=["vector", "graph", "community"])
         assert result["confidence"] == 0
         assert result["low_confidence"] is True
 
@@ -86,7 +91,7 @@ class TestConfidence:
 class TestEdgeCases:
     def test_empty_query_returns_a_mode(self):
         result = classify("")
-        assert result["primary_mode"] in {"graph", "community", "vector", "ontology", "web"}
+        assert result["primary_mode"] in {"graph", "community", "vector", "web"}
 
     def test_case_insensitive(self):
         lower = classify("what is rag?")
@@ -102,9 +107,31 @@ class TestEdgeCases:
 # ── INTENT_SIGNALS sanity ──────────────────────────────────────────────────
 
 class TestIntentSignals:
-    def test_all_four_modes_have_signals(self):
-        assert set(INTENT_SIGNALS.keys()) == {"graph", "community", "vector", "ontology"}
+    def test_all_three_modes_have_signals(self):
+        assert set(INTENT_SIGNALS.keys()) == {"graph", "community", "vector"}
 
     def test_each_mode_has_at_least_five_signals(self):
         for mode, signals in INTENT_SIGNALS.items():
             assert len(signals) >= 5, f"{mode} has fewer than 5 signals"
+
+
+class TestGraphBackend:
+    def test_authorship_uses_neo4j(self):
+        result = classify("Who are the authors of papers that use LoRA?")
+        assert result["primary_mode"] == "graph"
+        assert result["graph_backend"] == "neo4j"
+
+    def test_method_type_uses_rdflib(self):
+        result = classify("What type of method is LoRA?")
+        assert result["primary_mode"] == "graph"
+        assert result["graph_backend"] == "rdflib"
+
+    @pytest.mark.parametrize("query", [
+        "What are different finetuning methods?",
+        "What are the different fine-tuning methods?",
+        "List fine tuning methods",
+    ])
+    def test_fine_tuning_category_listing_uses_rdflib(self, query):
+        result = classify(query)
+        assert result["primary_mode"] == "graph"
+        assert result["graph_backend"] == "rdflib"

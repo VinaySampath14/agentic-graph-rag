@@ -13,7 +13,8 @@ _qdrant_client = None
 _dense_model = None
 _ontology_graph = None
 
-ONTOLOGY_FILE = Path("ontology/arxiv_cs_populated.ttl")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+ONTOLOGY_FILE = PROJECT_ROOT / "ontology" / "arxiv_cs_populated.ttl"
 
 
 def get_neo4j_driver():

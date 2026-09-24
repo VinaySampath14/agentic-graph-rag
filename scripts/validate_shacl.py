@@ -29,7 +29,8 @@ def main() -> None:
     conforms, results_graph, results_text = validate(
         data_graph,
         shacl_graph=shapes_graph,
-        advanced=True,  # required for sh:xone at node-shape level
+        advanced=True,
+        allow_warnings=True,
         debug=False,
     )
 
@@ -42,7 +43,7 @@ def main() -> None:
            sh:resultSeverity ?severity .
     } GROUP BY ?sourceShape ?severity
     """
-    print(f"conforms: {conforms}\n")
+    print(f"conforms (warnings allowed): {conforms}\n")
     print("Violation summary by shape:")
     for row in results_graph.query(query):
         shape = str(row.sourceShape).split("#")[-1]

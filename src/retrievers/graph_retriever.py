@@ -1,40 +1,16 @@
-"""Local graph retriever — Neo4j Cypher traversal with fuzzy entity linking.
-
-Ontology expansion: when a query mentions a method category (e.g. "fine-tuning
-methods", "alignment techniques"), the OWL ontology is queried for all members
-of that subclass. The expanded method list is then passed into Neo4j so category-
-level queries surface the correct papers and authors without hardcoding method names.
-"""
+"""Local graph retriever — Neo4j Cypher traversal with fuzzy entity linking."""
 import os
 import re
 
 import spacy
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-from rdflib import RDF, RDFS, Namespace
-
 from src.retrievers.models import RetrievalResult
 
 load_dotenv()
 
 _nlp = None
 _driver = None
-
-EX = Namespace("http://arxiv-cs.org/ontology#")
-
-# Maps query keywords → ontology subclass URI
-CATEGORY_SIGNALS = {
-    "fine-tuning":   EX.FineTuningMethod,
-    "fine tuning":   EX.FineTuningMethod,
-    "finetuning":    EX.FineTuningMethod,
-    "alignment":     EX.AlignmentMethod,
-    "attention":     EX.AttentionMethod,
-    "transformer":   EX.AttentionMethod,
-    "reasoning":     EX.ReasoningMethod,
-    "agent":         EX.ReasoningMethod,
-    "retrieval":     EX.RetrievalMethod,
-    "search":        EX.RetrievalMethod,
-}
 
 TEMPORAL_PATTERNS = [
     (r"after (\d{4})", "after"),
@@ -48,6 +24,12 @@ VENUE_KEYWORDS = [
     "neurips", "nips", "icml", "iclr", "acl", "emnlp", "naacl",
     "cvpr", "iccv", "eccv", "aaai", "ijcai", "arxiv",
 ]
+
+GENERIC_ENTITY_WORDS = {
+    "a", "an", "the", "that", "which", "who", "what", "paper", "papers",
+    "author", "authors", "wrote", "written", "use", "uses", "using", "about",
+    "related", "to", "of", "by", "method", "methods",
+}
 
 
 def _get_nlp():
@@ -69,32 +51,6 @@ def _get_driver():
                 auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
             )
     return _driver
-
-
-def _expand_with_ontology(query: str) -> list[str]:
-    """Return method names from the ontology if query mentions a category keyword."""
-    query_lower = query.lower()
-    matched_subclasses = set()
-
-    for keyword, subclass_uri in CATEGORY_SIGNALS.items():
-        if keyword in query_lower:
-            matched_subclasses.add(subclass_uri)
-
-    if not matched_subclasses:
-        return []
-
-    try:
-        from src.agent.connections import get_ontology_graph
-        g = get_ontology_graph()
-        methods = []
-        for subclass_uri in matched_subclasses:
-            for s, _, _ in g.triples((None, RDF.type, subclass_uri)):
-                label = g.value(s, RDFS.label)
-                if label:
-                    methods.append(str(label))
-        return list(dict.fromkeys(methods))  # deduplicate, preserve order
-    except Exception:
-        return []
 
 
 def _traverse_from_method(
@@ -128,7 +84,12 @@ def _extract_entities(query: str) -> list[str]:
     if not entities:
         entities = [chunk.text.strip() for chunk in doc.noun_chunks
                     if len(chunk.text.strip()) > 3]
-    return list(dict.fromkeys(entities))[:5]
+    informative = []
+    for entity in entities:
+        words = {word.lower() for word in re.findall(r"[^\W_]+", entity)}
+        if words and not words.issubset(GENERIC_ENTITY_WORDS):
+            informative.append(entity)
+    return list(dict.fromkeys(informative))[:5]
 
 
 def _detect_temporal_filter(query: str) -> tuple[str | None, int | None]:
@@ -151,7 +112,22 @@ def _detect_venue_filter(query: str) -> str | None:
     return None
 
 
+def _lucene_search_term(entity: str) -> str:
+    """Convert user text to a literal full-text query without Lucene operators."""
+    # Quoting alphanumeric tokens prevents punctuation such as '-', ':', '/',
+    # parentheses, or a trailing backslash from becoming Lucene query syntax.
+    tokens = [
+        token for token in re.findall(r"[^\W_]+", entity, flags=re.UNICODE)
+        if len(token) > 1
+    ]
+    return " AND ".join(f'"{token}"' for token in tokens)
+
+
 def _fuzzy_entity_search(entity: str, session) -> list[dict]:
+    search_term = _lucene_search_term(entity)
+    if not search_term:
+        return []
+
     result = session.run("""
         CALL db.index.fulltext.queryNodes('paperTitleIndex', $search_term)
         YIELD node, score
@@ -159,7 +135,7 @@ def _fuzzy_entity_search(entity: str, session) -> list[dict]:
         RETURN node.arxiv_id AS arxiv_id, node.title AS title, score
         ORDER BY score DESC
         LIMIT 5
-    """, search_term=entity)
+    """, search_term=search_term)
     papers = result.data()
 
     if not papers:
@@ -170,11 +146,25 @@ def _fuzzy_entity_search(entity: str, session) -> list[dict]:
             RETURN node.name AS name, score
             ORDER BY score DESC
             LIMIT 3
-        """, search_term=entity)
+        """, search_term=search_term)
         authors = result.data()
         return [{"type": "author", **a} for a in authors]
 
     return [{"type": "paper", **p} for p in papers]
+
+
+def _methods_mentioned_in_query(query: str, session) -> list[str]:
+    """Find known Neo4j method names explicitly mentioned in the query."""
+    rows = session.run("MATCH (m:Method) RETURN m.name AS name")
+    matches = []
+    for row in rows:
+        name = row["name"]
+        if not name or len(name) < 3:
+            continue
+        pattern = rf"(?<!\w){re.escape(name)}(?!\w)"
+        if re.search(pattern, query, flags=re.IGNORECASE):
+            matches.append(name)
+    return sorted(set(matches), key=len, reverse=True)
 
 
 def _traverse_from_paper(
@@ -257,17 +247,17 @@ def retrieve(query: str) -> RetrievalResult:
     temporal_filter = _detect_temporal_filter(query)
     venue_filter = _detect_venue_filter(query)
 
-    # Ontology expansion — resolve category keywords to specific method names
-    expanded_methods = _expand_with_ontology(query)
-
     driver = _get_driver()
     all_context_parts = []
     cypher_queries_used = []
 
     with driver.session() as session:
 
-        # Run ontology-expanded method queries first
-        for method_name in expanded_methods[:5]:
+        # Resolve method names explicitly mentioned in the question directly
+        # against Neo4j. This keeps ordinary graph retrieval independent from
+        # the RDF ontology and avoids relying on spaCy to label names like LoRA.
+        mentioned_methods = _methods_mentioned_in_query(query, session)
+        for method_name in mentioned_methods[:5]:
             results, cypher = _traverse_from_method(
                 method_name, temporal_filter, session
             )
@@ -276,15 +266,16 @@ def retrieve(query: str) -> RetrievalResult:
             if context:
                 all_context_parts.append(context)
 
-        # Fall back to standard entity extraction if no expansion or no results
+        # Fall back to standard entity extraction when no named method matched.
         if not all_context_parts:
             if not entities:
                 return RetrievalResult(
                     context_text="No entities found in query for graph traversal.",
                     source_type="graph",
+                    source_metadata={"graph_backend": "neo4j"},
                 )
 
-            for entity in entities[:3]:
+            for entity in entities[:5]:
                 matches = _fuzzy_entity_search(entity, session)
                 if not matches:
                     continue
@@ -322,6 +313,7 @@ def retrieve(query: str) -> RetrievalResult:
         return RetrievalResult(
             context_text="No graph results found for the given entities.",
             source_type="graph",
+            source_metadata={"graph_backend": "neo4j"},
             cypher_query_used=cypher_queries_used[0] if cypher_queries_used else None,
         )
 
@@ -330,8 +322,8 @@ def retrieve(query: str) -> RetrievalResult:
         source_type="graph",
         cypher_query_used="\n---\n".join(cypher_queries_used[:2]),
         source_metadata={
+            "graph_backend": "neo4j",
             "entities_found": entities,
-            "expanded_methods": expanded_methods,
             "temporal_filter": temporal_filter,
             "venue_filter": venue_filter,
         },

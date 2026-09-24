@@ -18,12 +18,10 @@ for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD", "TAV
         _os.environ[_k] = _os.environ[_k].strip().replace("\\n", "").replace("\r", "")
 
 EXAMPLE_QUERIES = [
-    "What methods are used for parameter-efficient fine-tuning?",
-    "Which papers use alignment methods after 2023?",
-    "Which institution has the most papers on multimodal learning?",
-    "Which papers cite the attention mechanism paper and were published in 2026?",
-    "What are the main trends in LLM safety research?",
-    "Who are the authors of papers using retrieval methods?",
+    "How does retrieval-augmented generation improve language models?",
+    "Who are the authors of papers that use LoRA?",
+    "What type of method is LoRA?",
+    "What are the main research themes across these papers?",
 ]
 
 EVAL_DIR = Path("data/eval")
@@ -184,17 +182,28 @@ def _build_graph_html(done: set, active: str | None, failed: set, loading: bool,
     ])
 
     kw = dict(done=done, active=active, failed=failed, retried=retried, success=success)
-    # Merge ontology_retriever into graph node visually — ontology is internal to graph retrieval
-    merged_kw = dict(**kw)
-    if "ontology_retriever" in done:
-        merged_kw = {**kw, "done": done | {"local_graph_retriever"}}
-    if "ontology_retriever" in retried:
-        merged_kw = {**kw, "retried": retried | {"local_graph_retriever"}}
+    # RDFLib is an internal backend of the single user-facing Graph mode.
+    def _merge_graph_backend(nodes: set[str]) -> set[str]:
+        if "ontology_retriever" in nodes:
+            return nodes | {"local_graph_retriever"}
+        return nodes
+
+    merged_kw = {
+        "done": _merge_graph_backend(done),
+        "active": (
+            "local_graph_retriever"
+            if active == "ontology_retriever"
+            else active
+        ),
+        "failed": _merge_graph_backend(failed),
+        "retried": _merge_graph_backend(retried),
+        "success": _merge_graph_backend(success),
+    }
     nodes = "\n".join([
         _draw_node("query_analyser",        "query_analyser", **merged_kw),
         _draw_node("router",                "router",         **merged_kw),
         _draw_node("naive_retriever",       "vector",         **merged_kw),
-        _draw_node("local_graph_retriever", "graph+ontology", **merged_kw),
+        _draw_node("local_graph_retriever", "graph",          **merged_kw),
         _draw_node("global_retriever",      "community",      **merged_kw),
         _draw_node("rewrite_query",         "rewrite_query",  **merged_kw),
         _draw_node("grade_context",         "grade_context",  **merged_kw),
@@ -231,13 +240,13 @@ _HERO_HTML = """
   <div style="color:#94a3b8;font-size:13.5px;line-height:1.65;margin-bottom:16px;">
     Self-correcting retrieval engine over <strong style="color:#cbd5e1;">2,000 arXiv CS papers</strong>
     (CS.AI + CS.CL &middot; 2026).<br>
-    Routes between vector, graph &amp; community modes &mdash; graph retrieval uses OWL ontology expansion &mdash; rewrites on failure, explains every decision.
+    Routes between vector, graph &amp; community modes &mdash; graph questions use either Neo4j/Cypher or RDFLib/SPARQL &mdash; rewrites on failure and explains every decision.
   </div>
   <div style="display:flex;gap:7px;flex-wrap:wrap;">
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Neo4j</span>
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Qdrant</span>
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">LangGraph</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Groq LLaMA 3.3 70B</span>
+    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Groq GPT-OSS 120B</span>
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">BGE-M3</span>
     <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">spaCy</span>
   </div>
@@ -284,8 +293,8 @@ _ABOUT_HTML = """
       <div style="font-size:12px;color:#3730a3;">Best for <em>factual / definitional</em> queries</div>
     </div>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;">
-      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;">&#9632; Graph + Ontology</div>
-      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j Cypher + fuzzy entity linking + OWL ontology expansion (130k triples)</div>
+      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;">&#9632; Graph</div>
+      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j/Cypher for explicit relations &middot; RDFLib/SPARQL for ontology semantics</div>
       <div style="font-size:12px;color:#15803d;">Best for <em>relational / authorship / category</em> queries</div>
     </div>
     <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;">
@@ -300,8 +309,8 @@ _ABOUT_HTML = """
   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
               padding:14px 18px;font-family:monospace;font-size:12.5px;color:#334155;
               line-height:1.8;margin-bottom:24px;">
-    Nodes: &nbsp;2,000 Paper &middot; 9,250 Author &middot; 3,003 Institution &middot; 286 Method &middot; 13 Community<br>
-    Ontology: 5 method subclasses &middot; 82,573 explicit triples &middot; 47,721 inferred triples &middot; 29.9% paper coverage
+    Nodes: &nbsp;2,000 Paper &middot; 9,250 Author &middot; 2,988 Institution &middot; 286 Method &middot; 13 Community<br>
+    Ontology: 7 method subclasses &middot; 227,077 total triples &middot; 59 reviewed method classifications
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
@@ -452,6 +461,7 @@ def run_query(query: str):
         "query": query,
         "rewritten_query": query,
         "intent": "",
+        "graph_backend": "neo4j",
         "retrieved_context": None,
         "grade_result": None,
         "answer": "",
@@ -537,7 +547,7 @@ def run_query(query: str):
                 extras = e.get("extras", {})
                 if "next_mode" in extras:
                     mode_map = {"vector": "naive_retriever", "graph": "local_graph_retriever",
-                                "community": "global_retriever", "ontology": "ontology_retriever",
+                                "community": "global_retriever",
                                 "web": "web_retriever"}
                     next_active = mode_map.get(extras["next_mode"])
                     break

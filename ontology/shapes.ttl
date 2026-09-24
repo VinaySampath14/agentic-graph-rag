@@ -8,23 +8,54 @@
 # ACTUALLY satisfies it, and reports every violation instead of declaring the
 # whole graph inconsistent. See competency questions #10, #11, #12.
 
-# ── #10 + #12 combined: every Method belongs to EXACTLY ONE category ────────
-# sh:xone ("exactly one of") fails on zero matches (uncategorized — #10)
-# AND on two-or-more matches (double-categorized — #12) in one rule.
+# Method categories are review-gated. Zero categories is a coverage warning;
+# more than one disjoint category is a hard integrity violation.
 
-ex:MethodCategoryShape
+ex:MethodCategoryExclusivityShape
     a sh:NodeShape ;
     sh:targetClass ex:Method ;
-    sh:xone (
-        [ sh:class ex:FineTuningMethod ]
-        [ sh:class ex:AttentionMethod ]
-        [ sh:class ex:AlignmentMethod ]
-        [ sh:class ex:ReasoningMethod ]
-        [ sh:class ex:RetrievalMethod ]
-        [ sh:class ex:PersonalizationMethod ]
-        [ sh:class ex:AgentSkillLearningMethod ]
-    ) ;
-    sh:message "A Method must belong to exactly one of the 7 categories (found zero or more than one)." .
+    sh:severity sh:Violation ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A Method must not belong to more than one of the 7 disjoint categories." ;
+        sh:select """
+            PREFIX ex: <http://arxiv-cs.org/ontology#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            SELECT $this WHERE {
+                $this rdf:type ?category .
+                FILTER (?category IN (
+                    ex:FineTuningMethod, ex:AttentionMethod, ex:AlignmentMethod,
+                    ex:ReasoningMethod, ex:RetrievalMethod,
+                    ex:PersonalizationMethod, ex:AgentSkillLearningMethod
+                ))
+            }
+            GROUP BY $this
+            HAVING (COUNT(DISTINCT ?category) > 1)
+        """ ;
+    ] .
+
+ex:MethodCategoryCoverageShape
+    a sh:NodeShape ;
+    sh:targetClass ex:Method ;
+    sh:severity sh:Warning ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Method has no reviewed category yet (informational coverage gap)." ;
+        sh:select """
+            PREFIX ex: <http://arxiv-cs.org/ontology#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            SELECT $this WHERE {
+                FILTER NOT EXISTS {
+                    $this rdf:type ?category .
+                    FILTER (?category IN (
+                        ex:FineTuningMethod, ex:AttentionMethod, ex:AlignmentMethod,
+                        ex:ReasoningMethod, ex:RetrievalMethod,
+                        ex:PersonalizationMethod, ex:AgentSkillLearningMethod
+                    ))
+                }
+            }
+        """ ;
+    ] .
 
 
 # ── #11a: every Paper must have at least one author ─────────────────────────

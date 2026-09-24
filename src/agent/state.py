@@ -9,7 +9,8 @@ class AgentState(TypedDict):
     # Core query fields
     query: str
     rewritten_query: str
-    intent: str  # "graph" | "vector" | "community" | "ontology"
+    intent: str  # "graph" | "vector" | "community"
+    graph_backend: str | None  # "neo4j" | "rdflib" for Graph mode
 
     # Retrieval + grading
     retrieved_context: RetrievalResult | None

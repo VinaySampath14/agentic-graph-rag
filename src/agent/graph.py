@@ -31,11 +31,11 @@ def route_after_analyser(state: AgentState) -> str:
 def route_after_router(state: AgentState) -> str:
     intent = state["intent"]
     if intent == "graph":
+        if state.get("graph_backend") == "rdflib":
+            return "ontology_retriever"
         return "local_graph_retriever"
     elif intent == "community":
         return "global_retriever"
-    elif intent == "ontology":
-        return "ontology_retriever"
     elif intent == "web":
         return "web_retriever"
     return "naive_retriever"
