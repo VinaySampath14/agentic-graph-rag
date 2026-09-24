@@ -1,4 +1,4 @@
-"""HuggingFace Spaces entrypoint — calls agent directly (no FastAPI server needed).
+"""Hugging Face Spaces entrypoint. Calls the agent directly without FastAPI.
 
 For local development with the FastAPI backend, use src/demo/app.py instead.
 """
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os as _os
-for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD", "TAVILY_API_KEY"):
+for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD"):
     if _k in _os.environ:
         _os.environ[_k] = _os.environ[_k].strip().replace("\\n", "").replace("\r", "")
 
@@ -27,10 +27,10 @@ EXAMPLE_QUERIES = [
 EVAL_DIR = Path("data/eval")
 VERSIONS = ["v1", "v2", "v3", "v4"]
 VERSION_LABELS = {
-    "v1": "v1 — Naive RAG",
-    "v2": "v2 — Static routing",
-    "v3": "v3 — Loop, no rewrite",
-    "v4": "v4 — Full system",
+    "v1": "v1: Naive RAG",
+    "v2": "v2: Static routing",
+    "v3": "v3: Loop without rewriting",
+    "v4": "v4: Full system",
 }
 
 
@@ -53,14 +53,14 @@ _SVG_STYLE = """<style>
 .pulse { animation: pulse 0.85s ease-in-out infinite; }
 </style>"""
 
-# Node layout: name → (cx, cy, w, h)  — all rects; END nodes handled separately
+# Node layout: name → (cx, cy, w, h). All rects; END nodes handled separately.
 _NL = {
     "query_analyser":        (285, 52,  165, 34),
     "router":                (285, 132, 110, 34),
     "naive_retriever":       (108, 218, 108, 34),
     "local_graph_retriever": (285, 218, 108, 34),
     "global_retriever":      (462, 218, 108, 34),
-    "ontology_retriever":    (285, 218, 108, 34),  # maps to same position as graph (hidden — internal)
+    "ontology_retriever":    (285, 218, 108, 34),  # Same position as graph; hidden internally.
     "rewrite_query":         (68,  318, 118, 34),
     "grade_context":         (285, 318, 140, 34),
     "web_retriever":         (488, 318,  92, 34),
@@ -74,12 +74,12 @@ _END_ANSWER = (285, 598, 20)
 
 
 def _nc(name, done, active, failed, retried=None, success=None):
-    if name == active:                         return "#fef3c7", "#f59e0b", "#92400e"  # yellow — running
-    if retried and name in retried:            return "#ffedd5", "#f97316", "#9a3412"  # orange — failed, retried
-    if success and name in success:            return "#dcfce7", "#22c55e", "#166534"  # green  — final success
-    if name in failed:                         return "#fee2e2", "#ef4444", "#991b1b"  # red    — permanent fail
-    if name in done:                           return "#dbeafe", "#3b82f6", "#1e40af"  # blue   — done
-    return "#f9fafb", "#d1d5db", "#9ca3af"                                             # gray   — pending
+    if name == active:                         return "#fef3c7", "#f59e0b", "#92400e"  # yellow: running
+    if retried and name in retried:            return "#ffedd5", "#f97316", "#9a3412"  # orange: failed, retried
+    if success and name in success:            return "#dcfce7", "#22c55e", "#166534"  # green: final success
+    if name in failed:                         return "#fee2e2", "#ef4444", "#991b1b"  # red: permanent fail
+    if name in done:                           return "#dbeafe", "#3b82f6", "#1e40af"  # blue: done
+    return "#f9fafb", "#d1d5db", "#9ca3af"                                             # gray: pending
 
 
 def _ec(src, dst, done, failed):
@@ -167,7 +167,7 @@ def _build_graph_html(done: set, active: str | None, failed: set, loading: bool,
         # grade_context → force_refusal (exhausted)
         _path(f"M 230,330 C 180,370 130,390 88,403",
               e("grade_context","force_refusal"), dashed=True),
-        # rewrite_query → router (curved loop back up — hugs left margin to avoid vector node)
+        # rewrite_query → router (curved loop back along the left margin)
         _path(f"M 68,301 C 15,260 15,110 230,132",
               e("rewrite_query","router"), dashed=True),
     ])
@@ -234,21 +234,26 @@ def _build_graph_html(done: set, active: str | None, failed: set, loading: bool,
 _HERO_HTML = """
 <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#312e81 100%);
             border-radius:14px;padding:26px 32px 22px;margin-bottom:2px;">
-  <div style="font-size:22px;font-weight:700;color:white;letter-spacing:-0.3px;margin-bottom:6px;">
-    &#128269; Agentic Graph RAG
+  <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px;">
+    <span style="font-size:23px;">&#128269;</span>
+    <span style="font-size:22px;font-weight:750;color:white;letter-spacing:-0.3px;">Agentic Graph RAG</span>
   </div>
-  <div style="color:#94a3b8;font-size:13.5px;line-height:1.65;margin-bottom:16px;">
-    Self-correcting retrieval engine over <strong style="color:#cbd5e1;">2,000 arXiv CS papers</strong>
-    (CS.AI + CS.CL &middot; 2026).<br>
-    Routes between vector, graph &amp; community modes &mdash; graph questions use either Neo4j/Cypher or RDFLib/SPARQL &mdash; rewrites on failure and explains every decision.
+  <div style="color:#cbd5e1;font-size:14px;line-height:1.65;margin-bottom:17px;max-width:880px;">
+    Ask questions about <strong style="color:white;">2,000 arXiv CS.AI and CS.CL papers</strong>.
+    The system chooses <strong style="color:white;">Vector</strong>, <strong style="color:white;">Graph</strong>, or
+    <strong style="color:white;">Community</strong> search based on the question. It checks the retrieved context
+    before answering and tries another mode when the context is not useful. Within Graph mode, it uses
+    <strong style="color:white;">Neo4j/Cypher</strong> for relationships or
+    <strong style="color:white;">RDFLib/SPARQL</strong> for ontology questions.
   </div>
   <div style="display:flex;gap:7px;flex-wrap:wrap;">
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Neo4j</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Qdrant</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">LangGraph</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">Groq GPT-OSS 120B</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">BGE-M3</span>
-    <span style="background:rgba(255,255,255,0.1);color:#93c5fd;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid rgba(147,197,253,0.25);">spaCy</span>
+    <span class="tech-badge">LangGraph</span>
+    <span class="tech-badge">Qdrant</span>
+    <span class="tech-badge">Neo4j</span>
+    <span class="tech-badge">RDFLib + OWL</span>
+    <span class="tech-badge">SHACL</span>
+    <span class="tech-badge">BGE-M3</span>
+    <span class="tech-badge">Groq &middot; GPT-OSS 120B</span>
   </div>
 </div>
 """
@@ -277,11 +282,19 @@ _LEGEND_HTML = """
 _ABOUT_HTML = """
 <div style="max-width:900px;">
 
-  <div style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:4px;">System Overview</div>
+  <div style="font-size:20px;font-weight:750;color:#0f172a;margin-bottom:5px;">How the system works</div>
   <div style="color:#64748b;font-size:14px;margin-bottom:22px;line-height:1.6;">
-    A LangGraph agentic loop over a Neo4j knowledge graph + Qdrant vector store built from
-    2,000 arXiv CS papers. When retrieval fails a quality grade, the agent rewrites the query
-    to suit the next mode and re-routes — up to 3 loops before a structured refusal.
+    The system first identifies what kind of question you asked. It then selects one retrieval mode
+    and checks whether the returned context is useful. If it is not, the system rewrites the question
+    and tries a mode that has not been used yet. Web search is the final fallback. If there is still
+    not enough evidence, the system says that it cannot answer.
+  </div>
+
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+              padding:13px 16px;margin-bottom:24px;color:#334155;font-size:12.5px;
+              font-family:monospace;line-height:1.8;">
+    analyse &rarr; route &rarr; retrieve &rarr; grade context &rarr; generate &rarr; grade answer<br>
+    <span style="color:#64748b;">on failure:</span> rewrite &rarr; select an untried mode &rarr; retrieve again
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
@@ -289,28 +302,40 @@ _ABOUT_HTML = """
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px;">&#9632; Vector</div>
-      <div style="font-size:12.5px;color:#1e3a8a;font-weight:600;margin-bottom:6px;">Qdrant hybrid (BGE-M3 dense + SPLADE sparse, RRF + cross-encoder rerank)</div>
-      <div style="font-size:12px;color:#3730a3;">Best for <em>factual / definitional</em> queries</div>
+      <div style="font-size:12.5px;color:#1e3a8a;font-weight:600;margin-bottom:6px;">Qdrant hybrid search: BGE-M3 dense + SPLADE sparse, fused and reranked</div>
+      <div style="font-size:12px;color:#3730a3;">Best for <em>explanations and factual questions</em></div>
     </div>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;">&#9632; Graph</div>
-      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j/Cypher for explicit relations &middot; RDFLib/SPARQL for ontology semantics</div>
-      <div style="font-size:12px;color:#15803d;">Best for <em>relational / authorship / category</em> queries</div>
+      <div style="font-size:12.5px;color:#14532d;font-weight:600;margin-bottom:6px;">Neo4j/Cypher for relationships or RDFLib/SPARQL for ontology semantics</div>
+      <div style="font-size:12px;color:#15803d;">Best for <em>authors, links, and method categories</em></div>
     </div>
     <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:#7e22ce;margin-bottom:4px;">&#9632; Community</div>
       <div style="font-size:12.5px;color:#581c87;font-weight:600;margin-bottom:6px;">Leiden cluster embeddings + Groq summaries</div>
-      <div style="font-size:12px;color:#9333ea;">Best for <em>thematic / trend</em> queries</div>
+      <div style="font-size:12px;color:#9333ea;">Best for <em>themes and collection-level trends</em></div>
     </div>
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
-              color:#94a3b8;margin-bottom:10px;">Knowledge Graph</div>
-  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
-              padding:14px 18px;font-family:monospace;font-size:12.5px;color:#334155;
-              line-height:1.8;margin-bottom:24px;">
-    Nodes: &nbsp;2,000 Paper &middot; 9,250 Author &middot; 2,988 Institution &middot; 286 Method &middot; 13 Community<br>
-    Ontology: 7 method subclasses &middot; 227,077 total triples &middot; 59 reviewed method classifications
+              color:#94a3b8;margin-bottom:10px;">Graph mode</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;">
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:15px 17px;">
+      <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:6px;">Neo4j property graph</div>
+      <div style="font-size:12.5px;color:#475569;line-height:1.65;">
+        2,000 papers &middot; 9,250 authors &middot; 2,988 institutions<br>
+        286 methods &middot; 13 Leiden communities<br>
+        <strong>Purpose:</strong> explicit entities and relationships
+      </div>
+    </div>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:15px 17px;">
+      <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:6px;">RDF/OWL ontology</div>
+      <div style="font-size:12.5px;color:#475569;line-height:1.65;">
+        227,077 triples &middot; 7 disjoint method subclasses<br>
+        59 reviewed corpus classifications &middot; SHACL validated<br>
+        <strong>Purpose:</strong> categories and inferred related work
+      </div>
+    </div>
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
@@ -318,14 +343,24 @@ _ABOUT_HTML = """
   <div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;
               border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:24px;">
     <div style="font-size:13.5px;color:#92400e;line-height:1.65;">
-      Adding a correction loop <strong>without</strong> query rewriting (v3) gives <strong>no coverage gain</strong> (27.5%).<br>
-      Adding <strong>mode-aware rewriting</strong> (v4) recovers coverage to <strong>81.2%</strong> &mdash;
-      rewriting is the critical mechanism.
+      A retry loop without query rewriting answers only <strong>27.5%</strong> of the evaluation questions.<br>
+      With mode-aware query rewriting, the full system answers <strong>81.2%</strong>. The rewritten query
+      helps the next retrieval mode find better context.
     </div>
   </div>
 
   <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
-              color:#94a3b8;margin-bottom:10px;">Links</div>
+              color:#94a3b8;margin-bottom:10px;">What to try</div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+              padding:14px 18px;margin-bottom:24px;font-size:12.5px;color:#475569;line-height:1.85;">
+    <strong>Vector:</strong> How does retrieval-augmented generation improve language models?<br>
+    <strong>Graph / Neo4j:</strong> Who are the authors of papers that use LoRA?<br>
+    <strong>Graph / RDFLib:</strong> What type of method is LoRA?<br>
+    <strong>Community:</strong> What are the main research themes across these papers?
+  </div>
+
+  <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+              color:#94a3b8;margin-bottom:10px;">Project links</div>
   <div style="display:flex;gap:10px;">
     <a href="https://github.com/VinaySampath14/agentic-graph-rag"
        style="background:#0f172a;color:white;padding:7px 16px;border-radius:8px;
@@ -342,7 +377,21 @@ _CSS = """
 /* Widen the main container */
 .gradio-container { max-width: 1080px !important; margin: 0 auto !important; }
 
-/* Answer output — subtle left-border card */
+/* Technology pills in the hero */
+.tech-badge {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.1);
+    color: #bfdbfe;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 650;
+    border: 1px solid rgba(147,197,253,0.28);
+}
+
+/* Answer output with a subtle left border */
 #answer-out .prose {
     background: #f8fafc;
     border-left: 3px solid #3b82f6;
@@ -374,7 +423,7 @@ _CSS = """
 /* Submit button */
 #submit-btn { min-height: 50px !important; font-size: 15px !important; font-weight: 700 !important; }
 
-/* Trace accordion — tighten spacing */
+/* Tighten trace accordion spacing */
 #trace-accordion > .label-wrap { padding: 8px 14px !important; }
 #trace-accordion > .label-wrap span { font-size: 13px !important; font-weight: 600 !important; color: #374151 !important; }
 
@@ -498,7 +547,7 @@ def run_query(query: str):
             node_name = list(chunk.keys())[0]
             state_delta = chunk[node_name]
 
-            # Determine if this node failed — check only the last trace entry
+            # Determine if this node failed. Check only the last trace entry.
             # (the one just appended by this node). The full accumulated list is
             # returned, so scanning all entries would catch old grade_context failures.
             trace = state_delta.get("agent_trace", [])
@@ -522,7 +571,7 @@ def run_query(query: str):
                     # Mark the retriever whose context was just rejected as orange.
                     # We use last_retriever (set when the retriever completed) rather than
                     # mode_history, because mode_history is updated by rewrite_query AFTER
-                    # grade_context fails — so it would point to the previous retriever.
+                    # grade_context fails, so it would point to the previous retriever.
                     if last_retriever:
                         retried_nodes.add(last_retriever)
                         done_nodes.discard(last_retriever)
@@ -532,9 +581,9 @@ def run_query(query: str):
                     retried_nodes.discard(node_name)
             else:
                 if node_name == "grade_answer":
-                    success_nodes.add(node_name)   # green — final success
+                    success_nodes.add(node_name)   # green: final success
                 elif node_name == "grade_context":
-                    # grade_context passed — clear retried state from it and last retriever
+                    # grade_context passed. Clear retried state from it and the last retriever.
                     retried_nodes.discard(node_name)
                     done_nodes.add(node_name)
                 else:
@@ -579,7 +628,7 @@ def run_query(query: str):
     mode_history = final_state.get("mode_history", [])
 
     answer_md = f"**Refused:** {refusal_reason}" if refused else final_state.get("answer", "")
-    # Final yield — spinner off
+    # Final yield with the spinner off
     yield answer_md, _meta_html(loop_count, mode_history, latency_ms), \
           _format_trace(final_state.get("agent_trace", [])), _graph(loading=False), _hide, _show
 
@@ -608,7 +657,7 @@ with gr.Blocks(title="Agentic Graph RAG", css=_CSS, theme=gr.themes.Soft()) as d
                         )
                         submit_btn = gr.Button("Ask →", variant="primary", scale=1, elem_id="submit-btn")
 
-                    # Examples — visible by default, hidden once user interacts
+                    # Examples are visible by default and hidden once the user interacts.
                     with gr.Column(visible=True) as examples_col:
                         gr.Examples(
                             examples=EXAMPLE_QUERIES,
@@ -616,7 +665,7 @@ with gr.Blocks(title="Agentic Graph RAG", css=_CSS, theme=gr.themes.Soft()) as d
                             label="Try an example",
                         )
 
-                    # Answer section — hidden until first submit
+                    # Answer section is hidden until the first submit.
                     with gr.Column(visible=False) as answer_col:
                         gr.HTML('<div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;'
                                 'text-transform:uppercase;color:#94a3b8;margin-bottom:6px;">Answer</div>')
