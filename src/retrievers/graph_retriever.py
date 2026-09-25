@@ -67,6 +67,7 @@ def _traverse_from_method(
         WHERE 1=1 {time_clause}
         RETURN DISTINCT p.arxiv_id AS arxiv_id, p.title AS title,
                p.year AS year, p.venue AS venue,
+               m.name AS matched_method,
                collect(DISTINCT a.name)[..3] AS authors
         ORDER BY p.year DESC
         LIMIT 10
@@ -229,15 +230,17 @@ def _traverse_from_author(author_name: str, temporal_filter: tuple, session) -> 
 def _serialise_results(results: list[dict], entity: str) -> str:
     if not results:
         return ""
-    lines = [f"Papers related to '{entity}':"]
+    lines = [f"Neo4j results for '{entity}':"]
     for r in results:
         line = f"- {r.get('title', 'Unknown')} (arxiv:{r.get('arxiv_id', '')}, {r.get('year', '')})"
+        if r.get("matched_method"):
+            line += f". Explicit USES_METHOD link: {r['matched_method']}"
         if r.get("shared_authors"):
-            line += f" — shared authors: {', '.join(r['shared_authors'])}"
+            line += f". Shared authors: {', '.join(r['shared_authors'])}"
         if r.get("shared_methods"):
-            line += f" — shared methods: {', '.join(r['shared_methods'])}"
+            line += f". Shared methods: {', '.join(r['shared_methods'])}"
         if r.get("authors"):
-            line += f" — authors: {', '.join(r['authors'])}"
+            line += f". Authors: {', '.join(r['authors'])}"
         lines.append(line)
     return "\n".join(lines)
 
