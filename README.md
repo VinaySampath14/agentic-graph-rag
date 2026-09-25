@@ -8,6 +8,9 @@ sdk_version: "5.9.1"
 app_file: app.py
 pinned: false
 python_version: "3.11"
+preload_from_hub:
+  - BAAI/bge-m3
+  - cross-encoder/ms-marco-MiniLM-L-6-v2
 ---
 
 # Agentic Graph RAG: Self-Correcting Retrieval over Scientific Literature
