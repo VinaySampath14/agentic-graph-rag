@@ -1,4 +1,5 @@
 """Naive vector retriever with Qdrant hybrid search and conditional reranking."""
+import time
 
 from dotenv import load_dotenv
 from fastembed import SparseTextEmbedding
@@ -15,6 +16,7 @@ COLLECTION = "papers"
 TOP_K_CANDIDATES = 20
 TOP_K_FINAL = 5
 RERANK_MARGIN_THRESHOLD = 0.15
+QDRANT_RETRY_ATTEMPTS = 3
 
 _sparse_model: SparseTextEmbedding | None = None
 _cross_encoder: CrossEncoder | None = None
@@ -45,33 +47,72 @@ def _get_qdrant_client() -> QdrantClient:
     return _qdrant_client
 
 
+def _query_points_with_retry(client, **kwargs):
+    """Retry transient Qdrant transport failures with a short backoff."""
+    for attempt in range(QDRANT_RETRY_ATTEMPTS):
+        try:
+            return client.query_points(**kwargs)
+        except Exception as exc:
+            message = str(exc).lower()
+            transient = any(
+                marker in message
+                for marker in (
+                    "connection reset",
+                    "connection refused",
+                    "temporarily unavailable",
+                    "timed out",
+                    "timeout",
+                )
+            )
+            if not transient or attempt == QDRANT_RETRY_ATTEMPTS - 1:
+                raise
+            time.sleep(0.5 * (2**attempt))
+
+
 def retrieve(query: str) -> RetrievalResult:
     dense_model = get_dense_model()
-    sparse_model = _get_sparse_model()
     client = _get_qdrant_client()
 
     # Dense embedding
     dense_vec = dense_model.encode([query])[0].tolist()
 
-    # Sparse embedding
-    sparse_vec = list(sparse_model.embed([query]))[0]
+    retrieval_strategy = "hybrid"
+    try:
+        sparse_model = _get_sparse_model()
+        sparse_vec = list(sparse_model.embed([query]))[0]
+        response = _query_points_with_retry(
+            client,
+            collection_name=COLLECTION,
+            prefetch=[
+                Prefetch(query=dense_vec, using="dense", limit=TOP_K_CANDIDATES),
+                Prefetch(
+                    query={
+                        "indices": sparse_vec.indices.tolist(),
+                        "values": sparse_vec.values.tolist(),
+                    },
+                    using="sparse",
+                    limit=TOP_K_CANDIDATES,
+                ),
+            ],
+            query=FusionQuery(fusion=Fusion.RRF),
+            limit=TOP_K_CANDIDATES,
+            with_payload=True,
+        )
+    except Exception as exc:
+        # Sparse retrieval is an enhancement. Dense search keeps the demo
+        # available if the SPLADE model cannot be downloaded or initialized.
+        print(f"Hybrid retrieval unavailable, using dense search: {exc}")
+        retrieval_strategy = "dense"
+        response = _query_points_with_retry(
+            client,
+            collection_name=COLLECTION,
+            query=dense_vec,
+            using="dense",
+            limit=TOP_K_CANDIDATES,
+            with_payload=True,
+        )
 
-    # Hybrid search with RRF fusion
-    results = client.query_points(
-        collection_name=COLLECTION,
-        prefetch=[
-            Prefetch(query=dense_vec, using="dense", limit=TOP_K_CANDIDATES),
-            Prefetch(
-                query={"indices": sparse_vec.indices.tolist(),
-                       "values": sparse_vec.values.tolist()},
-                using="sparse",
-                limit=TOP_K_CANDIDATES,
-            ),
-        ],
-        query=FusionQuery(fusion=Fusion.RRF),
-        limit=TOP_K_CANDIDATES,
-        with_payload=True,
-    ).points
+    results = response.points
 
     if not results:
         return RetrievalResult(
@@ -83,13 +124,22 @@ def retrieve(query: str) -> RetrievalResult:
     top2_scores = [r.score for r in results[:2]]
     margin = abs(top2_scores[0] - top2_scores[1]) if len(top2_scores) == 2 else 1.0
 
+    reranked = False
     if margin < RERANK_MARGIN_THRESHOLD:
-        cross_encoder = _get_cross_encoder()
-        pairs = [[query, r.payload.get("abstract", "")] for r in results]
-        ce_scores = cross_encoder.predict(pairs)
-        results = [r for _, r in sorted(
-            zip(ce_scores, results), key=lambda x: x[0], reverse=True
-        )]
+        try:
+            cross_encoder = _get_cross_encoder()
+            pairs = [[query, r.payload.get("abstract", "")] for r in results]
+            ce_scores = cross_encoder.predict(pairs)
+            results = [
+                r
+                for _, r in sorted(
+                    zip(ce_scores, results), key=lambda x: x[0], reverse=True
+                )
+            ]
+            reranked = True
+        except Exception as exc:
+            # Reranking improves ordering but is not required to answer.
+            print(f"Cross-encoder unavailable, keeping retrieval order: {exc}")
 
     top_results = results[:TOP_K_FINAL]
 
@@ -113,7 +163,11 @@ def retrieve(query: str) -> RetrievalResult:
     return RetrievalResult(
         context_text="\n\n---\n\n".join(context_parts),
         source_type="vector",
-        source_metadata={"results": metadata, "reranked": margin < RERANK_MARGIN_THRESHOLD},
+        source_metadata={
+            "results": metadata,
+            "retrieval_strategy": retrieval_strategy,
+            "reranked": reranked,
+        },
     )
 
 
