@@ -1,5 +1,4 @@
-"""Naive vector retriever — Qdrant hybrid search with conditional reranking."""
-import os
+"""Naive vector retriever with Qdrant hybrid search and conditional reranking."""
 
 from dotenv import load_dotenv
 from fastembed import SparseTextEmbedding
@@ -7,7 +6,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Prefetch, FusionQuery, Fusion
 from sentence_transformers import CrossEncoder
 
-from src.agent.connections import get_dense_model
+from src.agent.connections import clean_env_value, get_dense_model
 from src.retrievers.models import RetrievalResult
 
 load_dotenv()
@@ -40,8 +39,8 @@ def _get_qdrant_client() -> QdrantClient:
     global _qdrant_client
     if _qdrant_client is None:
         _qdrant_client = QdrantClient(
-            url=os.environ["QDRANT_URL"],
-            api_key=os.environ["QDRANT_API_KEY"],
+            url=clean_env_value("QDRANT_URL"),
+            api_key=clean_env_value("QDRANT_API_KEY"),
         )
     return _qdrant_client
 

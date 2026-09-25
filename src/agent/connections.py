@@ -1,4 +1,4 @@
-"""Singleton connections and shared models — initialised once at startup."""
+"""Singleton connections and shared models initialized once at startup."""
 import os
 from pathlib import Path
 
@@ -17,12 +17,23 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ONTOLOGY_FILE = PROJECT_ROOT / "ontology" / "arxiv_cs_populated.ttl"
 
 
+def clean_env_value(name: str) -> str:
+    """Return an environment value without accidental line breaks."""
+    return (
+        os.environ[name]
+        .replace("\\n", "")
+        .replace("\r", "")
+        .replace("\n", "")
+        .strip()
+    )
+
+
 def get_neo4j_driver():
     global _neo4j_driver
     if _neo4j_driver is None:
         _neo4j_driver = GraphDatabase.driver(
-            os.environ["NEO4J_URI"],
-            auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
+            clean_env_value("NEO4J_URI"),
+            auth=(clean_env_value("NEO4J_USER"), clean_env_value("NEO4J_PASSWORD")),
         )
         _neo4j_driver.verify_connectivity()
     return _neo4j_driver
@@ -32,8 +43,8 @@ def get_qdrant_client() -> QdrantClient:
     global _qdrant_client
     if _qdrant_client is None:
         _qdrant_client = QdrantClient(
-            url=os.environ["QDRANT_URL"],
-            api_key=os.environ["QDRANT_API_KEY"],
+            url=clean_env_value("QDRANT_URL"),
+            api_key=clean_env_value("QDRANT_API_KEY"),
         )
     return _qdrant_client
 

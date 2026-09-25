@@ -15,7 +15,13 @@ load_dotenv()
 import os as _os
 for _k in ("GROQ_API_KEY", "QDRANT_API_KEY", "NEO4J_URI", "NEO4J_PASSWORD"):
     if _k in _os.environ:
-        _os.environ[_k] = _os.environ[_k].strip().replace("\\n", "").replace("\r", "")
+        _os.environ[_k] = (
+            _os.environ[_k]
+            .replace("\\n", "")
+            .replace("\r", "")
+            .replace("\n", "")
+            .strip()
+        )
 
 EXAMPLE_QUERIES = [
     "How does retrieval-augmented generation improve language models?",
